@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="22px" height="21px" viewBox="0 0 22 21" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 51.3 (57544) - http://www.bohemiancoding.com/sketch -->
+    <title>metamask-fox-colors</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
+        <g id="Componentes" transform="translate(-74.000000, -1115.000000)" fill-rule="nonzero">
+            <g id="Botón-aceptar" transform="translate(49.000000, 1110.000000)">
+                <g id="Group-2" transform="translate(26.000000, 6.000000)">
+                    <g id="metamask-fox-colors">
+                        <polygon id="Shape" stroke="#E2761B" fill="#E2761B" points="18.953125 0.0390625 11.171875 5.8125 12.6171875 2.40625"></polygon>
+                        <g id="Group" transform="translate(0.156250, 0.000000)" fill="#E4761B" stroke="#E4761B">
+                            <polygon id="Shape" points="0.8515625 0.0390625 8.5625 5.8671875 7.1875 2.40625"></polygon>
+                            <polygon id="Shape" points="16 13.421875 13.9296875 16.59375 18.359375 17.8125 19.625 13.4921875"></polygon>
+                            <polygon id="Shape" points="0.03125 13.4921875 1.2890625 17.8125 5.71875 16.59375 3.65625 13.421875"></polygon>
+                            <polygon id="Shape" points="5.4765625 8.0625 4.2421875 9.9296875 8.6328125 10.125 8.484375 5.3984375"></polygon>
+                            <polygon id="Shape" points="14.171875 8.0625 11.1171875 5.34375 11.015625 10.125 15.40625 9.9296875"></polygon>
+                            <polygon id="Shape" points="5.71875 16.59375 8.3671875 15.3046875 6.0859375 13.5234375"></polygon>
+                            <polygon id="Shape" points="11.28125 15.3046875 13.9296875 16.59375 13.5625 13.5234375"></polygon>
+                        </g>
+                        <g id="Group" transform="translate(5.859375, 15.234375)" fill="#D7C1B3" stroke="#D7C1B3">
+                            <polygon id="Shape" points="8.2265625 1.359375 5.578125 0.0703125 5.7890625 1.796875 5.765625 2.5234375"></polygon>
+                            <polygon id="Shape" points="0.015625 1.359375 2.4765625 2.5234375 2.4609375 1.796875 2.6640625 0.0703125"></polygon>
+                        </g>
+                        <polygon id="Shape" stroke="#233447" fill="#233447" points="8.3828125 12.3828125 6.1796875 11.734375 7.734375 11.0234375"></polygon>
+                        <polygon id="Shape" stroke="#233447" fill="#233447" points="11.578125 12.3828125 12.2265625 11.0234375 13.7890625 11.734375"></polygon>
+                        <g id="Group" transform="translate(3.750000, 9.921875)" fill="#CD6116" stroke="#CD6116">
+                            <polygon id="Shape" points="2.125 6.671875 2.5078125 3.5 0.0625 3.5703125"></polygon>
+                            <polygon id="Shape" points="9.953125 3.5 10.3359375 6.671875 12.40625 3.5703125"></polygon>
+                            <polygon id="Shape" points="11.8125 0.0078125 7.421875 0.203125 7.828125 2.4609375 8.4765625 1.1015625 10.0390625 1.8125"></polygon>
+                            <polygon id="Shape" points="2.4296875 1.8125 3.984375 1.1015625 4.6328125 2.4609375 5.0390625 0.203125 0.6484375 0.0078125"></polygon>
+                        </g>
+                        <g id="Group" transform="translate(4.375000, 9.921875)" fill="#E4751F" stroke="#E4751F">
+                            <polygon id="Shape" points="0.0234375 0.0078125 1.8671875 3.6015625 1.8046875 1.8125"></polygon>
+                            <polygon id="Shape" points="9.4140625 1.8125 9.34375 3.6015625 11.1875 0.0078125"></polygon>
+                            <polygon id="Shape" points="4.4140625 0.203125 4.0078125 2.4609375 4.5234375 5.125 4.6328125 1.6171875"></polygon>
+                            <polygon id="Shape" points="6.796875 0.203125 6.5859375 1.609375 6.6875 5.125 7.203125 2.4609375"></polygon>
+                        </g>
+                        <polygon id="Shape" stroke="#F6851B" fill="#F6851B" points="11.578125 12.3828125 11.0625 15.046875 11.4375 15.3046875 13.71875 13.5234375 13.7890625 11.734375"></polygon>
+                        <polygon id="Shape" stroke="#F6851B" fill="#F6851B" points="6.1796875 11.734375 6.2421875 13.5234375 8.5234375 15.3046875 8.8984375 15.046875 8.3828125 12.3828125"></polygon>
+                        <polygon id="Shape" stroke="#C0AD9E" fill="#C0AD9E" points="11.625 17.7578125 11.6484375 17.03125 11.453125 16.859375 8.5078125 16.859375 8.3203125 17.03125 8.3359375 17.7578125 5.875 16.59375 6.734375 17.296875 8.484375 18.5078125 11.4765625 18.5078125 13.2265625 17.296875 14.0859375 16.59375"></polygon>
+                        <polygon id="Shape" stroke="#161616" fill="#161616" points="11.4375 15.3046875 11.0625 15.046875 8.8984375 15.046875 8.5234375 15.3046875 8.3203125 17.03125 8.5078125 16.859375 11.453125 16.859375 11.6484375 17.03125"></polygon>
+                        <g id="Group" fill="#763D16" stroke="#763D16">
+                            <polygon id="Shape" points="19.28125 6.1875 19.9375 3 18.953125 0.0390625 11.4375 5.6171875 14.328125 8.0625 18.4140625 9.2578125 19.3125 8.203125 18.921875 7.921875 19.546875 7.3515625 19.0703125 6.9765625 19.6953125 6.5"></polygon>
+                            <polygon id="Shape" points="0.0234375 3 0.6875 6.1875 0.265625 6.5 0.890625 6.9765625 0.4140625 7.3515625 1.0390625 7.921875 0.6484375 8.203125 1.546875 9.2578125 5.6328125 8.0625 8.5234375 5.6171875 1.0078125 0.0390625"></polygon>
+                        </g>
+                        <polygon id="Shape" stroke="#F6851B" fill="#F6851B" points="18.4140625 9.2578125 14.328125 8.0625 15.5625 9.9296875 13.71875 13.5234375 16.15625 13.4921875 19.78125 13.4921875"></polygon>
+                        <polygon id="Shape" stroke="#F6851B" fill="#F6851B" points="5.6328125 8.0625 1.546875 9.2578125 0.1875 13.4921875 3.8125 13.4921875 6.2421875 13.5234375 4.3984375 9.9296875"></polygon>
+                        <polygon id="Shape" stroke="#F6851B" fill="#F6851B" points="11.171875 10.125 11.4375 5.6171875 12.6171875 2.40625 7.34375 2.40625 8.5234375 5.6171875 8.7890625 10.125 8.890625 11.546875 8.8984375 15.046875 11.0625 15.046875 11.0703125 11.546875"></polygon>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

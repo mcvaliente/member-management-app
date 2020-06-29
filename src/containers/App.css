@@ -1,0 +1,13 @@
+.App {
+  margin: 20px 20px 20px 200px;
+  padding: 0;
+  height: 100%;
+  font-family: Lato;
+  font-size: 20px;
+}
+
+p {
+  color: #56595A;
+  line-height: normal !important;
+  margin: auto !important;
+}

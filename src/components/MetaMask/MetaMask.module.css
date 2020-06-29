@@ -1,0 +1,15 @@
+.MetaMask {
+    margin: 20px auto;
+    font-size: 13px;
+}
+
+.MetaMaskLink {
+    color: #56595A;
+    margin: 100px auto;
+    text-decoration: underline;
+}
+
+.MetaMaskImg {
+    float: right;
+}
+  

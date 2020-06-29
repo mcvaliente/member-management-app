@@ -17,6 +17,7 @@ contract MemberFactory {
     function getMemberCount() public view returns (uint){
         return deployedMembers.length;
     }
+
 }
 
 contract Ownable {
@@ -49,16 +50,20 @@ contract Ownable {
         grantedUsers[userAccount] = false;
     }
 
+    function isGrantedUser (address userAccount) public view returns(bool){
+        return (grantedUsers[userAccount]);
+    }
+
 }
 
 contract Member is Ownable {
 
     struct BasicInfo {
-        string memberId;
+        bytes32 memberId; //NIF/NIE
         string name;
         string surname;
-        string birthdate; //dd/mm/aaaa
-        string acceptanceDate; //dd/mm/aaaa
+        bytes32 birthdate; //dd/mm/aaaa
+        bytes32 acceptanceDate; //dd/mm/aaaa
         uint totalOccupations;
         mapping (uint => string) occupations;
     }
@@ -76,8 +81,8 @@ contract Member is Ownable {
         owner = creator;
     }
 
-    function addMemberBasicInformation(string memory memberId, string memory name, string memory surname,
-                            string memory birthdate, string memory acceptanceDate) public restricted(msg.sender) {
+    function addMemberBasicInformation(bytes32 memberId, string memory name, string memory surname,
+                            bytes32 birthdate, bytes32 acceptanceDate) public restricted(msg.sender) {
         BasicInfo memory newMember = BasicInfo({
             memberId: memberId,
             name: name,
@@ -106,8 +111,8 @@ contract Member is Ownable {
         memberLocation = newMemberLocation;
     }
 
-    function getMemberSummary() public view returns(string memory, string memory,
-                                                    string memory, string memory, string memory, uint)
+    function getMemberSummary() public view returns(bytes32, string memory,
+                                                    string memory, bytes32, bytes32, uint)
     {
 
         return (

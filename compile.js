@@ -5,8 +5,8 @@ const fs = require ('fs-extra'); //similar to fs module but it has a couple of e
 const buildPath = path.resolve(__dirname, 'build');
 fs.removeSync(buildPath);
 
-const campaignPath = path.resolve(__dirname, './contracts', 'Member.sol');
-const source = fs.readFileSync(campaignPath, 'utf8');
+const memberPath = path.resolve(__dirname, './contracts', 'Member.sol');
+const source = fs.readFileSync(memberPath, 'utf8');
 
 var input = {
     language: 'Solidity',
