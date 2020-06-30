@@ -1,6 +1,6 @@
 import React from 'react'
 import { Image } from 'semantic-ui-react';
-import styles from './Header.module.css';
+import styles from '../../assets/css/Header.module.css';
 
 const srcSmartLogo = '/images/logo-smart.png'
 const srcMetaMaskIcon = '/images/metamask-fox-icon.svg'

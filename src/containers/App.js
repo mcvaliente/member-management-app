@@ -3,8 +3,7 @@ import './App.css';
 import Layout from '../components/layout/Layout';
 import 'semantic-ui-css/semantic.min.css'
 import { checkMetaMask } from '../contracts/web3';
-import MetaMask from '../components/MetaMask/MetaMask';
-
+import MetaMask from '../components/metamask/MetaMask';
 
 class App extends Component {
   state = {
