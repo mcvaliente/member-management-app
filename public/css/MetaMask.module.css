@@ -1,0 +1,24 @@
+.MetaMask {
+    margin: 20px auto;
+    font-size: 13px;
+}
+
+.MetaMaskButtonLink {
+    color: #56595A;
+    text-decoration: underline;
+    background: none!important;
+    border: none;
+    outline-color: transparent;
+    padding: 0!important;
+    cursor: pointer;
+    font-family: Lato;
+}
+
+.MetaMaskButtonLink:hover {
+    color: #F7861C;
+}
+
+.MetaMaskImg {
+    float: right;
+}
+  

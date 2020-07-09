@@ -24,27 +24,38 @@
 
 .headerButton {
     float: right;
-    background-color: #F7861C;
-    border-color: #F7861C;
+    background-color: #F7861C !important;
+    border: 2px solid #F7861C !important;
+    border-radius: 4px;
     vertical-align: middle;
     width: 280px;
     height: 60px;
     padding: 0;
     box-shadow: none;
-    border-radius: 4px;
     cursor: pointer;
 }
 
-.headerButtonDisabled {
+.headerButton:disabled {
     float: right;
-    background-color: #F6BA81;
-    border-color: #F6BA81;
+    background-color: #F6BA81 !important;
+    border: 2px solid #F6BA81 !important;
+    border-radius: 4px;
     vertical-align: middle;
     width: 280px;
     height: 60px;
     padding: 0;
-    box-shadow: none;
+    cursor: not-allowed;
+}
+
+.headerButtonConnected {
+    float: right;
+    background-color: #C4C9BF !important;
+    border: 2px solid #C4C9BF !important;
     border-radius: 4px;
+    vertical-align: middle;
+    width: 280px;
+    height: 60px;
+    padding: 0;
     cursor: not-allowed;
 }
 
@@ -59,4 +70,5 @@
     font-size: 17px;
     
 }
+
 

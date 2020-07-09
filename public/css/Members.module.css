@@ -1,0 +1,36 @@
+.Members {
+    margin: 20px auto;
+    font-size: 20px;
+}
+
+.span {
+    color: #56595A;
+    line-height: normal !important;
+    margin: auto !important;
+}
+
+.NewMemberButton {
+    background-color: #979EA2;
+    border: 2px solid #979EA2;
+    border-radius: 4px;
+    vertical-align: middle;
+    padding: 0;
+    cursor: pointer;
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 13px;
+    margin-left: 20px;
+    width: 150px;
+    height: 40px;
+}
+
+.NewMemberButton:hover {
+    color: #ffffff;
+}
+
+.NewMemberButton:disabled {
+    background-color: #DDDDDD;
+    color: #ffffff;
+    border: 2px solid #DDDDDD;
+    cursor: not-allowed;
+}
