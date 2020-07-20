@@ -17,9 +17,9 @@ export function checkMetaMask() {
 
 export async function enableMetaMask() {
     if (typeof window.ethereum !== 'undefined'){
-        await window.ethereum.enable();
-        //New forthcoming web3 API.
-        //await window.ethereum.request({ method: 'eth_requestAccounts'});
+        //MetaMask is installed.
+        //Launch the plugin:
+        await window.ethereum.request({ method: 'eth_requestAccounts'});
         return true;
     }else {
         return false;
@@ -28,16 +28,20 @@ export async function enableMetaMask() {
 
 export async function checkRinkebyNetwork(){
     try {
-        const web3 = getWeb3();
-        const networkId = await web3.eth.net.getId();
-        //El identificador de la red Rinkeby es el 4.
-        const isRinkeby = (networkId === 4);
-        if (isRinkeby){
-          console.log ('OK - Rinkeby network selected.')
-          return true;
-        }else {
-          console.log ('ERROR - Please, select Rinkeby network.')
-          return false;
+        if (typeof window.ethereum !== 'undefined'){
+            //const networkId = window.ethereum.chainId;
+            const web3 = getWeb3();
+            const networkId = web3.chainId;
+            //The Rinkeby network id is the hex code '0x4'
+            console.log("chainId: " + networkId);
+            const isRinkeby = (networkId === '0x4');
+            if (isRinkeby){
+            console.log ('OK - Rinkeby network selected.')
+            return true;
+            }else {
+            console.log ('ERROR - Please, select Rinkeby network.')
+            return false;
+            }
         }
       } catch (error) {
           console.error(error);
@@ -56,9 +60,11 @@ export function getWeb3(){
     //Infura link in the SMART API project.
     //In the new forthcoming web3 API window.web3
     //must be removed and only we could use window.ethereum.
+    //July 2020: Comment second option due to updates in MetaMask.
+    //window.web3 must be removed.
    if (!web3) {
-       web3 = new Web3(window.ethereum
-                    || (window.web3 && window.web3.currentProvider));
+       web3 = new Web3(window.ethereum);
+                    //|| (window.web3 && window.web3.currentProvider));
                     //|| "wss://rinkeby.infura.io/ws/v3/91143daf5d0b469aba463c5085542585");
     }
 

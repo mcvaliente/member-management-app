@@ -25,7 +25,7 @@ const MetaMask = () => {
                 </GridRow>
                 <GridRow style={{marginTop: -20}}>
                     <Grid.Column width = {10}>
-                        <MetaMaskInfo />
+                        <MetaMaskInfo messageInfo= '¿Qué es MetaMask y para qué lo necesito?' />
                     </Grid.Column>
                     <Grid.Column width={10} />
                 </GridRow>

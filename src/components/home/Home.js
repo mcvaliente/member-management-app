@@ -12,7 +12,7 @@ class Home extends Component {
                 <p>¡Hola!</p>
                 <p>Gracias por ayudarnos a completar la información de las</p>
                 <p>personas que formamos parte de Smart.</p>
-                {this.props.showMetaMaskSection ? <MetaMask />  : (this.props.showRinkebySection ? <Rinkeby /> : <Members MetaMaskConnected = {this.props.MetaMaskConnected} />)}
+                {this.props.metaMaskInstalled ? (this.props.rinkebyNetwork ? <Members metaMaskConnected = {this.props.metaMaskConnected} /> : <Rinkeby />) : <MetaMask />}
             </div>
         );  
     }

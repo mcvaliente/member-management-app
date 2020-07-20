@@ -11,7 +11,7 @@
     font-size: 30px;
     color: #56595A;
     font-weight: bold;
-    margin: 40px 20px 20px 20px;
+    margin: 40px auto;
 }
 
 .headerSubtitle {
@@ -19,7 +19,7 @@
     font-family: Lato;
     font-size: 12px;
     color: #389FD3;
-    margin: 70px 20px 20px 20px;
+    margin: 70px auto;
 }
 
 .headerButton {
@@ -49,26 +49,32 @@
 
 .headerButtonConnected {
     float: right;
-    background-color: #C4C9BF !important;
-    border: 2px solid #C4C9BF !important;
+    background-color: #ffffff !important;
+    border: 2px solid #ffffff !important;
     border-radius: 4px;
     vertical-align: middle;
     width: 280px;
     height: 60px;
     padding: 0;
-    cursor: not-allowed;
+    cursor: default;
 }
 
 .headerButtonImage {
-    margin-left: 10px;    
+    margin-left: 10px;
+    margin-top: -5px;
 }
 
 .headerButtonText {
-    margin-left: 20px;
-    color: #FFFFFF;
+    margin-left: 10px;
+    color: #FFFF;
     font-family: Lato;
     font-size: 17px;
     
 }
-
-
+.headerButtonTextConnected {
+    margin-left: 2px;
+    color: #56595A;
+    font-weight: bold;
+    font-family: Lato;
+    font-size: 17px;    
+}

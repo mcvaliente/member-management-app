@@ -12,7 +12,7 @@ class MetaMaskInfo extends Component {
     render() { 
         return (
             <button className={styles.MetaMaskButtonLink} onClick={this.metaMaskInfoClickHandler}>
-                ¿Qué es MetaMask y para qué lo necesito?
+                {this.props.messageInfo}
             </button>
         );
     }

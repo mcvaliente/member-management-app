@@ -7,7 +7,7 @@ const Members = ( props ) => {
         <div className={styles.Members}>
             <span className={styles.span}>¿Quieres añadir a una nueva persona?</span>
             <Link to='/addmember'>
-                <button className={styles.NewMemberButton} disabled = {!props.MetaMaskConnected}>Añadir socio/a</button>
+                <button className={styles.NewMemberButton} disabled = {!props.metaMaskConnected}>Añadir socio/a</button>
             </Link>
         </div>
     );
