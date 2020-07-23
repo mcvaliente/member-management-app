@@ -6,9 +6,9 @@ import { Loader } from '../utils/smartloader';
 import Layout from '../components/layout/Layout';
 import { checkMetaMask, checkRinkebyNetwork, enableMetaMask } from '../contracts/web3';
 import { Switch, Route } from "react-router-dom";
-import NewMember from '../components/members/member/NewMember';
+import NewMember from '../containers/member/NewMember';
 import Home from '../components/home/Home';
-import NotFound from './NotFound';
+import NotFound from '../components/error/NotFound';
 
 class App extends Component { 
 
@@ -27,51 +27,12 @@ class App extends Component {
     //and disable the MetaMask connection button.
     //This instruction is equivalent to: this.setState({ isMetaMaskInstalled : isMetaMaskInstalled });
     this.setState({ isMetaMaskInstalled });
-    //If MetaMask is installed we have to check if the Ethereum Tesnet Rinkeby network is selected 
-    //in the MetaMask user account.
+    //If MetaMask is installed we have to check if the user it is connected to our application yet
+    //using the Rinkeby Test Network.
     if (isMetaMaskInstalled){
       const isRinkebyNetwork = await checkRinkebyNetwork();
-      this.setState({ isRinkebyNetwork });
+      this.setState({ isRinkebyNetwork });      
     }
-
-    //We check that we have the MetaMask provider enabled.
-    if (typeof window.ethereum !== 'undefined'){
-      
-      window.ethereum.autoRefreshOnNetworkChange = false;
-
-      window.ethereum.on('accountsChanged', (accounts) => {
-        // Handle the new accounts, or lack thereof.
-        // "accounts" will always be an array, but it can be empty.
-        if (accounts.length === 0) {
-          // MetaMask is locked or the user has not connected any accounts.
-          this.setState ({ isRinkebyNetwork : false, metaMaskConnected: false, errorMessage : "Por favor, conéctate a una cuenta de MetaMask y selecciona la red Rinkeby para la correcta ejecución de la aplicación."});
-        }else {
-          //Check first if we have the Rinkeby network selected:
-          const isRinkeby = checkRinkebyNetwork();
-          this.setState ({ isRinkebyNetwork : isRinkeby, metaMaskConnected: true, errorMessage : ''});
-         
-        }
-      });
-      
-      //If the newtwork changes then display an alert if the network is not the Rinkeby network.
-      window.ethereum.on('chainChanged', (chainId) => {
-        // Handle the new chain.
-        console.log("netid: " + chainId);
-        if (chainId !== '0x4'){
-          this.setState ({ isRinkebyNetwork : false, isMetaMaskConnected : false, errorMessage : "Por favor, seleccionar la Red Rinkeby en MetaMask para la correcta ejecución de la aplicación."});
-          // Correctly handling chain changes can be complicated.
-          // We recommend reloading the page unless you have a very good reason not to.
-          //window.location.reload();
-        } else {
-          this.setState({isRinkebyNetwork : true, isMetaMaskConnected: true, errorMessage : '' });
-        }
-      });
-    }
-  }
-
-  componentWillUnmount(){
-    window.removeEventListener('chainChanged');
-    window.removeEventListener('accountsChanged');
   }
 
   metaMaskConnectionHandler = async () => {

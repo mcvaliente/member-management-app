@@ -1,10 +1,14 @@
 import React, { Component } from 'react';
 import { Form, Input, Message, Icon } from 'semantic-ui-react';
 import { NavLink } from 'react-router-dom';
-import styles from '../../../assets/css/NewMember.module.css';
-import { counties, offices, categories, occupations } from '../../../utils/smartutils';
-import { checkEmail, checkTextField, checkID, checkDateField, checkListField } from './MemberValidation';
-import SmartAlert from '../../../utils/smartalert';
+import styles from '../../assets/css/NewMember.module.css';
+import { counties, offices, categories, occupations } from '../../utils/smartconfig';
+import { checkEmail, checkTextField, checkID, checkDateField, checkListField } from '../../components/members/member/MemberValidation';
+import { getWeb3, checkRinkebyNetwork, getCurrentAccount }from '../../contracts/web3';
+import swal from 'sweetalert';
+import factory from '../../contracts/factory';
+import { Loader } from '../../utils/smartloader';
+import MemberOccupations from '../../components/members/member/MemberOccupations';
 
 class NewMember extends Component {
 
@@ -26,8 +30,7 @@ class NewMember extends Component {
 		occupationCategoryList: [],
 		categoryList: [],
 		loading: false,
-		errorMessage: '',
-		finishForm : false
+		errorMessage: ''
 	}
 
 	componentDidMount (){
@@ -50,7 +53,7 @@ class NewMember extends Component {
 	}
 
 	countySelectHandler = (e) => {
-		console.log ("Selected county: " + e.target.value);
+		//console.log ("Selected county: " + e.target.value);
 		
 		if (e.target.value !== 'countySelection')	
 		{
@@ -59,7 +62,7 @@ class NewMember extends Component {
 	};
 
 	officeSelectHandler = (e) => {
-		console.log ("Selected office: " + e.target.value);
+		//console.log ("Selected office: " + e.target.value);
 		
 		if (e.target.value !== 'officeSelection')	
 		{
@@ -68,7 +71,7 @@ class NewMember extends Component {
 	};
 
 	categorySelectHandler = (e) => {
-		console.log ("Selected category: " + e.target.value);
+		//console.log ("Selected category: " + e.target.value);
 		
 		if (e.target.value !== 'categorySelection')	
 		{
@@ -77,7 +80,7 @@ class NewMember extends Component {
 	};
 
 	occupationSelectHandler = (e) => {
-		console.log("Selected occupation: " + e.target.value);
+		//console.log("Selected occupation: " + e.target.value);
 		if (e.target.value !== "occupationSelection") {
 			const occupationsList = [...this.state.occupations];
 			this.setState({ currentOccupation : e.target.value });
@@ -89,6 +92,12 @@ class NewMember extends Component {
 		}
 	};
 
+	deleteMemberOccupationHandler = occupationIndex => {
+		const occupations = [...this.state.occupations];
+		occupations.splice(occupationIndex, 1);
+		this.setState({ occupations: occupations });
+	  };
+	
 	onSubmit = async (event) => {
 
 		event.preventDefault();
@@ -97,17 +106,16 @@ class NewMember extends Component {
 		//Shortcut for states of this class.
 		const { name, surname, memberID, birthdate, county, office, email, occupations, acceptanceDate } = this.state;
 
-		//Show loading and reset the error message to an empty string.
+		//Reset the error message to an empty string.
 		this.setState({ errorMessage : '' });
 
 		try{
 			//FIELD VALIDATION
 
 			//Check name
-			console.log("Name: "  + name);
 			validMember = checkTextField(name);
 			if (!validMember){
-				this.setState({ loading: false, errorMessage : 'Por favor, introduce el nombre del nuevo/a socio/a.'});	
+				this.setState({ errorMessage : 'Por favor, introduce el nombre del nuevo/a socio/a.'});	
 			}
 			
 			//Check surname
@@ -115,7 +123,7 @@ class NewMember extends Component {
 			{
 				validMember = checkTextField(surname);
 				if (!validMember){
-					this.setState({ loading: false, errorMessage : 'Por favor, introduce los apellidos del nuevo/a socio/a.'});
+					this.setState({ errorMessage : 'Por favor, introduce los apellidos del nuevo/a socio/a.'});
 				}
 			}
 
@@ -123,7 +131,7 @@ class NewMember extends Component {
 			if (validMember){
 				validMember = checkID (memberID);
 				if (!validMember){
-					this.setState({ loading: false, errorMessage : 'Por favor, introduce una identificación válida (DNI/NIE).'});
+					this.setState({ errorMessage : 'Por favor, introduce una identificación válida (NIF/NIE).'});
 				}
 			}
 
@@ -132,7 +140,7 @@ class NewMember extends Component {
 				if (validMember){
 					validMember = checkDateField(birthdate);
 					if (!validMember){
-						this.setState({ loading: false, errorMessage : 'Por favor, introduce una fecha de nacimiento válida de acuerdo al formato dd/mm/aaaa.'});
+						this.setState({ errorMessage : 'Por favor, introduce una fecha de nacimiento válida de acuerdo al formato dd/mm/aaaa.'});
 					}
 				}	
 			}
@@ -142,7 +150,7 @@ class NewMember extends Component {
 				if (validMember){
 					validMember = checkTextField(county);
 					if (!validMember){
-						this.setState({ loading: false, errorMessage : 'Por favor, selecciona la provincia de residencia del nuevo/a socio/a.'});
+						this.setState({ errorMessage : 'Por favor, selecciona la provincia de residencia del nuevo/a socio/a.'});
 					}
 				}	
 			}
@@ -152,7 +160,7 @@ class NewMember extends Component {
 				if (validMember){
 					validMember = checkTextField(office);
 					if (!validMember){
-						this.setState({ loading: false, errorMessage : 'Por favor, selecciona la delegación a la que pertecen el nuevo/a socio/a.'});
+						this.setState({ errorMessage : 'Por favor, selecciona la delegación a la que pertecen el nuevo/a socio/a.'});
 					}
 				}	
 			}
@@ -161,16 +169,17 @@ class NewMember extends Component {
 			if (validMember){
 				validMember = checkEmail(email);
 				if (!validMember) {
-					this.setState({ loading: false, errorMessage : 'Por favor, introduce un email válido.'});
+					this.setState({ errorMessage : 'Por favor, introduce un email válido.'});
 				} 	
 			}
 
 			//Check occupations.
 			if (validMember){
 				if (validMember){
+					console.log("Occupations: ", occupations);
 					validMember = checkListField(occupations);
 					if (!validMember){
-						this.setState({ loading: false, errorMessage : 'Por favor, selecciona la profesión(es) del nuevo/a socio/a.'});
+						this.setState({ errorMessage : 'Por favor, selecciona la profesión(es) del nuevo/a socio/a.'});
 					}
 				}	
 			}
@@ -180,7 +189,7 @@ class NewMember extends Component {
 				if (validMember){
 					validMember = checkDateField(acceptanceDate);
 					if (!validMember){
-						this.setState({ loading: false, errorMessage : 'Por favor, introduce una fecha de aceptación válida de acuerdo al formato dd/mm/aaaa.'});
+						this.setState({ errorMessage : 'Por favor, introduce una fecha de aceptación válida de acuerdo al formato dd/mm/aaaa.'});
 					}
 				}	
 			}
@@ -188,33 +197,93 @@ class NewMember extends Component {
 			if (validMember)
 			{
 				//All the fields are OK.
-				this.setState({finishForm : true});
+				//swal("Form successfully filled!");
 				//Request confirmation from the user in order to save the member in the Blockchain.
+				swal({
+					title: "¿Continuar?",
+					text: "Se va a proceder al registro del nuevo/a socio/a en la Blockchain de Rinkeby Test Network.",
+					icon: "warning",
+					buttons: true,
+					dangerMode: true,
+				  })
+				  .then( async (willContinue) => {
+					if (willContinue) {
+				  		//Show loading and reset the error message to an empty string.
+						this.setState({ loading: true, errorMessage : '' });
+						try {
+							const web3 = getWeb3();
+							//Check account.
+							const accounts = await web3.eth.getAccounts();
+							if (accounts.length === 0) {
+								swal("Error", "Por favor, conéctate a una cuenta de MetaMask para poder realizar el registro", "error")
+							} else {
+								console.log ("Web3 accounts: ", accounts)
+								const isRinkeby = checkRinkebyNetwork();
+								if (isRinkeby){
+									//Get the current account.									
+									const currentAccount = getCurrentAccount();
+									const bytes32MemberId = web3.utils.fromAscii(this.state.memberID);
+									//Create the new member indicating the creator of this member.									
+									await factory.methods
+										.createMember(bytes32MemberId)
+										.send({
+											from: currentAccount,
+											gas: '2000000'
+										});
 
-				//const accounts = await web3.eth.getAccounts();
-				//(accounts.length === 0 ? console.log("No accounts.") : console.log ("Web3 accounts: ", accounts));
-				//await campaign.methods
-				//	.createRequest(description, web3.utils.toWei(value, 'ether'), recipient)
-				//	.send({
-				//		from: accounts[0]
-				//	});
+									//Check that the member has been included.
+									const memberContractAddress = await factory.methods.getMemberAddress(bytes32MemberId).call();
+									console.log("Member contract address: " + memberContractAddress);
+									//Total members.
+									const memberCount = await factory.methods.getMemberCount().call();
+									console.log("Total members: " + memberCount);
+									//Check the deployed members.
+									const smartMembers = await factory.methods.getDeployedMembers().call();
+									let count = 1;
+									smartMembers.map(address => {
+											console.log("member(" + count + "): " + address);
+											count++;
+											return true;	
+									});
 
-				//Router.pushRoute(`/campaigns/${this.props.address}/requests`);
-				//this.setState({
-				//	loading : false, 
-				//	name : '', 
-				//	surname : '', 
-				//	memberID : '', 
-				//	birthdate : '', 
-				//	county: '', 
-				//	office: '', 
-				//	email : '', 
-				//	occupations : [], 
-				//	acceptanceDate : '',
-				//	currentCategory : 'categorySelection',
-				//	currentOccupation : 'occupationSelection'
-				//});
+									//Check the member info stored in the blockchain.
+									//const memberInfo = await member.methods.getMemberSummary().call();
+									//const output = '[' + JSON.stringify(memberInfo) + ']';
+									//console.log("Member info: ", output);
+									//const jsonOutput = JSON.parse(output);
+									//for (var i = 0; i < jsonOutput.length; i++)
+									//{
+									//	console.log("NIF/NIE: ", web3.utils.toAscii(jsonOutput[i]['0']));
+									//}
 
+									//Reset the form fields.
+									this.setState({
+										loading : false, 
+										name : '', 
+										surname : '', 
+										memberID : '', 
+										birthdate : '', 
+										county: '', 
+										office: '', 
+										email : '', 
+										occupations : [], 
+										acceptanceDate : '',
+										currentCategory : 'categorySelection',
+										currentOccupation : 'occupationSelection'
+									});
+
+									swal("¡Proceso completo!", "El nuevo/a socio/a se ha registrado en la Blockchain sin ninguna incidencia.", "success");
+
+								}else {
+									swal("Error", "Por favor, selecciona la red Rinkeby para poder realizar el registro", "error");
+								}
+							}
+						} catch (error) {
+							this.setState({errorMessage : error.message});
+						}
+						
+					} 
+				});
 			}
 
 		}catch (err){
@@ -229,7 +298,7 @@ class NewMember extends Component {
 			<div className={styles.NewMember}>
 				<NavLink to='/'>Volver</NavLink>
 				<h3>Por favor, completa este formulario para la aceptación formal de nuevos socios/as</h3>
-				<Form loading={this.state.loading} onSubmit={this.onSubmit} error={!!this.state.errorMessage} style={{width : '80%'}}>
+				<Form onSubmit={this.onSubmit} error={!!this.state.errorMessage} style={{width : '100%'}}>
 					<Form.Group widths='equal'>
 						<Form.Field>
 							<label>Nombre</label>
@@ -253,7 +322,7 @@ class NewMember extends Component {
 					</Form.Group>
 
 					<Form.Field>
-							<label>DNI / NIE</label>
+							<label>NIF / NIE</label>
 							<input 
 								placeholder = 'NIF / NIE'
 								value = {this.state.memberID}
@@ -350,19 +419,12 @@ class NewMember extends Component {
 						</Form.Field>
 					</Form.Group>
 
-					 <div>
-						<p>Lista de profesiones totales:</p>
-				        <ul>
-          					{this.state.occupationCategoryList.map(item => <li key={item.id}>{item.name} - ({item.category})</li>)}
-        				</ul>
-      				</div>
-
-					<div>
-						<p>Lista de profesiones seleccionadas:</p>
-				        <ul>
-          					{this.state.occupations.map(item => <li key={item}>{item}</li>)}
-        				</ul>
-      				</div>
+					<div className={styles.newMemberOccupationSelectedList}>
+						<MemberOccupations
+							occupations={this.state.occupations}
+							clicked={this.deleteMemberOccupationHandler}
+						/>
+					</div>
 					
 					<Form.Field>
 								<label>Fecha de aceptación</label>
@@ -380,7 +442,7 @@ class NewMember extends Component {
 						{this.props.metaMaskConnected ? <button className={styles.newMemberButton}>Aceptar</button> : <button className={styles.newMemberButton} disabled>Aceptar</button>}
 					</div>
 				</Form>
-				{this.state.finishForm ? <SmartAlert></SmartAlert> : null}
+				{this.state.loading ? <Loader></Loader> : null}
 			</div>
 		);
 	}

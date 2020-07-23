@@ -51,9 +51,7 @@ function validateNIF(nif) {
 export function checkDateField(fieldValue){
     if (typeof fieldValue !== undefined && fieldValue !== ''){
         //Check that the field is dd/mm/aaaa
-        console.log("valor fecha: " + fieldValue);
         var isValid = isValidDate(fieldValue);
-        console.log(isValid);
         if (!isValid){
             return false;
         }

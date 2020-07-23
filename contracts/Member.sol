@@ -4,11 +4,13 @@ pragma solidity >=0.4.22 <0.7.0;
 contract MemberFactory {
 
     Member[] private deployedMembers;
+    mapping(bytes32 => Member) memberAddresses;
 
-    function createMember() public {
+    function createMember(bytes32 memberId) public {
         Member newMember = new Member(msg.sender);
+        memberAddresses[memberId] = newMember;
         deployedMembers.push(newMember);
-    }
+     }
 
     function getDeployedMembers() public view returns (Member[] memory) {
         return deployedMembers;
@@ -18,6 +20,9 @@ contract MemberFactory {
         return deployedMembers.length;
     }
 
+    function getMemberAddress(bytes32 memberId) public view returns (Member){
+        return memberAddresses[memberId];
+    }
 }
 
 contract Ownable {
@@ -33,27 +38,6 @@ contract Ownable {
         );
         _;
     }
-
-    modifier restricted(address userAccount){
-        require(
-            grantedUsers[userAccount],
-            "ERROR_NOT_GRANTED_USER."
-        );
-        _;
-    }
-
-    function addGrantedUser(address userAccount) public  onlyOwner(msg.sender) {
-        grantedUsers[userAccount] = true;
-    }
-
-    function revokeGrantedUser(address userAccount) public onlyOwner(msg.sender) {
-        grantedUsers[userAccount] = false;
-    }
-
-    function isGrantedUser (address userAccount) public view returns(bool){
-        return (grantedUsers[userAccount]);
-    }
-
 }
 
 contract Member is Ownable {
@@ -66,6 +50,7 @@ contract Member is Ownable {
         bytes32 acceptanceDate; //dd/mm/aaaa
         uint totalOccupations;
         mapping (uint => string) occupations;
+        bool isActive;
     }
 
     struct LocationInfo {
@@ -82,26 +67,27 @@ contract Member is Ownable {
     }
 
     function addMemberBasicInformation(bytes32 memberId, string memory name, string memory surname,
-                            bytes32 birthdate, bytes32 acceptanceDate) public restricted(msg.sender) {
+                            bytes32 birthdate, bytes32 acceptanceDate) public onlyOwner (msg.sender) {
         BasicInfo memory newMember = BasicInfo({
             memberId: memberId,
             name: name,
             surname: surname,
             birthdate: birthdate,
             acceptanceDate: acceptanceDate,
-            totalOccupations: 0
+            totalOccupations: 0,
+            isActive: true
         });
 
         memberInfo = newMember;
     }
 
-    function addMemberOccupation(string memory occupation) public restricted (msg.sender) {
+    function addMemberOccupation(string memory occupation) public onlyOwner (msg.sender) {
         uint occupationNumber = memberInfo.totalOccupations;
         memberInfo.occupations[occupationNumber] = occupation;
         memberInfo.totalOccupations = occupationNumber + 1;
     }
 
-    function addMemberLocation(string memory county, string memory office, string memory country) public restricted (msg.sender) {
+    function addMemberLocation(string memory county, string memory office, string memory country) public onlyOwner (msg.sender) {
 
         LocationInfo memory newMemberLocation = LocationInfo({
             county: county,
@@ -112,7 +98,7 @@ contract Member is Ownable {
     }
 
     function getMemberSummary() public view returns(bytes32, string memory,
-                                                    string memory, bytes32, bytes32, uint)
+                                                    string memory, bytes32, bytes32, uint, bool)
     {
 
         return (
@@ -121,7 +107,8 @@ contract Member is Ownable {
             memberInfo.surname,
             memberInfo.birthdate,
             memberInfo.acceptanceDate,
-            memberInfo.totalOccupations
+            memberInfo.totalOccupations,
+            memberInfo.isActive
         );
     }
 

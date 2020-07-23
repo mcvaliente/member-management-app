@@ -2,7 +2,7 @@ const path = require('path');
 const solc = require('solc');
 const fs = require ('fs-extra'); //similar to fs module but it has a couple of extra functions (removeSync and ensureDirSync).
 
-const buildPath = path.resolve(__dirname, 'build');
+const buildPath = path.resolve(__dirname, 'src/contracts/build');
 fs.removeSync(buildPath);
 
 const memberPath = path.resolve(__dirname, './contracts', 'Member.sol');

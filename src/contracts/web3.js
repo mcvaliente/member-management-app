@@ -29,24 +29,21 @@ export async function enableMetaMask() {
 export async function checkRinkebyNetwork(){
     try {
         if (typeof window.ethereum !== 'undefined'){
-            //const networkId = window.ethereum.chainId;
             const web3 = getWeb3();
-            const networkId = web3.chainId;
-            //The Rinkeby network id is the hex code '0x4'
-            console.log("chainId: " + networkId);
-            const isRinkeby = (networkId === '0x4');
+            const networkId = await web3.eth.net.getId();
+            const isRinkeby = (networkId === 4);
             if (isRinkeby){
-            console.log ('OK - Rinkeby network selected.')
-            return true;
+                console.log ('OK - Rinkeby network selected.')
+                return true;
             }else {
-            console.log ('ERROR - Please, select Rinkeby network.')
-            return false;
+                console.log ('ERROR - Please, select Rinkeby network.')
+                return false;
             }
         }
       } catch (error) {
           console.error(error);
-      }
-    
+          return false;
+      }    
 }
 
 export function getWeb3(){
@@ -62,11 +59,25 @@ export function getWeb3(){
     //must be removed and only we could use window.ethereum.
     //July 2020: Comment second option due to updates in MetaMask.
     //window.web3 must be removed.
-   if (!web3) {
-       web3 = new Web3(window.ethereum);
+    if (window.ethereum){
+        web3 = new Web3(window.ethereum);
                     //|| (window.web3 && window.web3.currentProvider));
                     //|| "wss://rinkeby.infura.io/ws/v3/91143daf5d0b469aba463c5085542585");
     }
 
     return web3;    
 }
+
+export function getCurrentAccount (){
+    try {
+        if (typeof window.ethereum !== 'undefined'){
+            const currentAccount = window.ethereum.selectedAddress;
+            console.log("Current address: " + currentAccount);
+            return currentAccount;
+        }
+      } catch (error) {
+          console.error(error);
+          return null;
+      }    
+}
+

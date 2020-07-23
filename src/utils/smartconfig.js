@@ -14,7 +14,8 @@ export const counties = [
 //Offices
 export const offices = [
     {id: "BCN", name: "Barcelona" },
-    {id: "MAD", name: "Madrid" }
+    {id: "MAD", name: "Madrid" },
+    {id: "SEV", name: "Sevilla" }
 ];
 
 //Categories

@@ -1,6 +1,6 @@
 const HDWalletProvider = require('truffle-hdwallet-provider');
 const Web3 = require('web3');
-const compiledFactory = require('./build/MemberFactory.json');
+const compiledFactory = require('./src/contracts/build/MemberFactory.json');
 const provider = new HDWalletProvider(
 	'spot common confirm random harsh asset dynamic faith bronze endorse kind mouse',
 	'https://rinkeby.infura.io/v3/91143daf5d0b469aba463c5085542585'
