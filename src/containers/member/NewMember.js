@@ -3,10 +3,11 @@ import { Form, Input, Message, Icon } from 'semantic-ui-react';
 import { NavLink } from 'react-router-dom';
 import styles from '../../assets/css/NewMember.module.css';
 import { counties, offices, categories, occupations } from '../../utils/smartconfig';
-import { checkEmail, checkTextField, checkID, checkDateField, checkListField } from '../../components/members/member/MemberValidation';
+import { checkEmail, checkTextField, checkID, checkDateField, greaterThanCurrentDate, checkListField } from '../../components/members/member/MemberValidation';
 import { getWeb3, checkRinkebyNetwork, getCurrentAccount }from '../../contracts/web3';
 import swal from 'sweetalert';
 import factory from '../../contracts/factory';
+import Member from '../../contracts/member';
 import { Loader } from '../../utils/smartloader';
 import MemberOccupations from '../../components/members/member/MemberOccupations';
 
@@ -141,6 +142,11 @@ class NewMember extends Component {
 					validMember = checkDateField(birthdate);
 					if (!validMember){
 						this.setState({ errorMessage : 'Por favor, introduce una fecha de nacimiento válida de acuerdo al formato dd/mm/aaaa.'});
+					}else {
+						validMember = greaterThanCurrentDate(birthdate);
+						if (!validMember){
+							this.setState({ errorMessage : 'La fecha de nacimiento no puede ser posterior a la fecha actual.'});
+						}
 					}
 				}	
 			}
@@ -190,6 +196,11 @@ class NewMember extends Component {
 					validMember = checkDateField(acceptanceDate);
 					if (!validMember){
 						this.setState({ errorMessage : 'Por favor, introduce una fecha de aceptación válida de acuerdo al formato dd/mm/aaaa.'});
+					}else {
+						validMember = greaterThanCurrentDate(acceptanceDate);
+						if (!validMember){
+							this.setState({ errorMessage : 'La fecha de aceptación no puede ser posterior a la fecha actual.'});
+						}
 					}
 				}	
 			}
@@ -215,7 +226,7 @@ class NewMember extends Component {
 							//Check account.
 							const accounts = await web3.eth.getAccounts();
 							if (accounts.length === 0) {
-								swal("Error", "Por favor, conéctate a una cuenta de MetaMask para poder realizar el registro", "error")
+								swal("Error", "Por favor, conéctate a una cuenta de MetaMask para poder realizar el registro.", "error");
 							} else {
 								console.log ("Web3 accounts: ", accounts)
 								const isRinkeby = checkRinkebyNetwork();
@@ -223,63 +234,120 @@ class NewMember extends Component {
 									//Get the current account.									
 									const currentAccount = getCurrentAccount();
 									const bytes32MemberId = web3.utils.fromAscii(this.state.memberID);
-									//Create the new member indicating the creator of this member.									
-									await factory.methods
-										.createMember(bytes32MemberId)
-										.send({
-											from: currentAccount,
-											gas: '2000000'
+									//Check that we don't have the same ID in the cooperative.
+									const memberAddress = await factory.methods.getMemberAddress(bytes32MemberId).call();
+									console.log("Dirección del contrato para este Id: ", memberAddress);
+									if (memberAddress !== "0x0000000000000000000000000000000000000000"){
+										this.setState({ loading: false });
+										swal("Error", "Ya existe una persona socia con la misma identificación.", "error")
+									} else {
+										//Create the new member indicating the creator of this member.									
+										await factory.methods
+											.createMember(bytes32MemberId)
+											.send({
+												from: currentAccount,
+												gas: '2000000'
+											});
+
+										//Check that the member has been included.
+										const memberContractAddress = await factory.methods.getMemberAddress(bytes32MemberId).call();
+										console.log("Member contract address: " + memberContractAddress);
+										//Total members.
+										const memberCount = await factory.methods.getMemberCount().call();
+										console.log("Total members: " + memberCount);
+										//Check the deployed members.
+										const smartMembers = await factory.methods.getDeployedMembers().call();
+										let count = 1;
+										smartMembers.map(address => {
+												console.log("member(" + count + "): " + address);
+												count++;
+												return true;	
 										});
 
-									//Check that the member has been included.
-									const memberContractAddress = await factory.methods.getMemberAddress(bytes32MemberId).call();
-									console.log("Member contract address: " + memberContractAddress);
-									//Total members.
-									const memberCount = await factory.methods.getMemberCount().call();
-									console.log("Total members: " + memberCount);
-									//Check the deployed members.
-									const smartMembers = await factory.methods.getDeployedMembers().call();
-									let count = 1;
-									smartMembers.map(address => {
-											console.log("member(" + count + "): " + address);
-											count++;
-											return true;	
-									});
+										//Now we can store the member data in the blockchain
+										const member = Member(memberContractAddress);
+										const bytes32Birthdate = web3.utils.fromAscii(this.state.birthdate);
+										const bytes32AcceptanceDate = web3.utils.fromAscii(this.state.acceptanceDate);
+										await member.methods
+											.addMemberBasicInformation(bytes32MemberId, this.state.name, this.state.surname, bytes32Birthdate, bytes32AcceptanceDate)
+											.send({
+												from: currentAccount,
+												gas: '2000000'
+											});
 
-									//Check the member info stored in the blockchain.
-									//const memberInfo = await member.methods.getMemberSummary().call();
-									//const output = '[' + JSON.stringify(memberInfo) + ']';
-									//console.log("Member info: ", output);
-									//const jsonOutput = JSON.parse(output);
-									//for (var i = 0; i < jsonOutput.length; i++)
-									//{
-									//	console.log("NIF/NIE: ", web3.utils.toAscii(jsonOutput[i]['0']));
-									//}
+										//Add the location
+										await member.methods
+											.addMemberLocation(this.state.county, this.state.office, this.state.country)
+											.send({
+												from: currentAccount,
+												gas: '1000000'
+											});
 
-									//Reset the form fields.
-									this.setState({
-										loading : false, 
-										name : '', 
-										surname : '', 
-										memberID : '', 
-										birthdate : '', 
-										county: '', 
-										office: '', 
-										email : '', 
-										occupations : [], 
-										acceptanceDate : '',
-										currentCategory : 'categorySelection',
-										currentOccupation : 'occupationSelection'
-									});
+										//Add the occupations
+										for (var i = 0; i < this.state.occupations.length; i++){
+											await member.methods
+												.addMemberOccupation(occupations[i])
+												.send({
+													from: currentAccount,
+													gas: '1000000'
+												});
+										}
 
-									swal("¡Proceso completo!", "El nuevo/a socio/a se ha registrado en la Blockchain sin ninguna incidencia.", "success");
+										//Check the member info stored in the blockchain.
+										const memberInfo = await member.methods.getMemberSummary().call();
+										const output = '[' + JSON.stringify(memberInfo) + ']';
+										console.log("Member info: ", output);
+										const jsonOutput = JSON.parse(output);
+										let totalOccupations = 0;
+										for (var j = 0; j < jsonOutput.length; j++)
+										{
+											console.log("NIF/NIE: ", web3.utils.toAscii(jsonOutput[j]['0']));
+											totalOccupations = parseInt(jsonOutput[j]['5'], 10);
+											console.log("Total occupations: ", totalOccupations);
+										}
 
+										//Member location
+										const memberLocation = await member.methods.getMemberLocation().call();
+										const outputLocation = JSON.stringify(memberLocation);
+										console.log("Member location: ", outputLocation);
+										const jsonOutputLocation = JSON.parse(outputLocation);
+										console.log("Office: ", jsonOutputLocation['0']);
+										console.log("County: ", jsonOutputLocation['1']);
+										console.log("Country: ", jsonOutputLocation['2']);
+
+										//Member occupations
+										let memberOccupation;
+										for (var l = 0; l < totalOccupations; l++){
+											memberOccupation = await member.methods.getMemberOccupation(l).call();
+											console.log("Member occupation (", l, "):", memberOccupation);
+										}
+
+										//Reset the form fields.
+										this.setState({
+											loading : false, 
+											name : '', 
+											surname : '', 
+											memberID : '', 
+											birthdate : '', 
+											county: '', 
+											office: '', 
+											email : '', 
+											occupations : [], 
+											acceptanceDate : '',
+											currentCategory : 'categorySelection',
+											currentOccupation : 'occupationSelection'
+										});
+
+										swal("¡Proceso completo!", "El nuevo/a socio/a se ha registrado en la Blockchain sin ninguna incidencia.", "success");
+									}
 								}else {
+									this.setState({ loading: false, errorMessage : '' });
 									swal("Error", "Por favor, selecciona la red Rinkeby para poder realizar el registro", "error");
 								}
 							}
 						} catch (error) {
-							this.setState({errorMessage : error.message});
+							this.setState({ loading: false });
+							swal("Error", error.message, "error");
 						}
 						
 					} 
@@ -287,7 +355,7 @@ class NewMember extends Component {
 			}
 
 		}catch (err){
-			this.setState({ errorMessage : err.message });
+			this.setState({ loading : false, errorMessage : err.message });
 		}
 
 	}; 

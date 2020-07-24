@@ -84,7 +84,21 @@ function isValidDate(dateValue) {
         var strZero = "0";
         return inputDate.getFullYear().toString() === dateParts[2] && (strDateMonth === dateParts[1] || strZero.concat(strDateMonth) === dateParts[1]) ;
     }
-}  
+} 
+
+export function greaterThanCurrentDate(dateValue){
+    //dateValue with the format dd/mm/aaaa
+    var separators = ['\\/'];
+    var dateParts = dateValue.split(new RegExp(separators.join('|'), 'g'));
+    var inputDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
+    var currentDate = new Date();
+    if (inputDate > currentDate){
+        return false;
+    } else{
+        return true;
+    }
+
+}
 
 export function checkListField(fieldValue){
     //Check that at least the list contains one element.
