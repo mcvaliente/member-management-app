@@ -46,7 +46,7 @@ class NewMember extends Component {
     occupationCategoryList: [],
     categoryList: [],
     loading: false,
-    errorMessage: "",
+    errorMessage: ""
   };
 
   componentDidMount() {
@@ -110,8 +110,8 @@ class NewMember extends Component {
     this.setState({ occupations: occupations });
   };
 
-  onSubmit = async (event) => {
-    event.preventDefault();
+  onSubmit = async (e) => {
+    e.preventDefault();
     let validMember = true;
 
     //Shortcut for states of this class.
@@ -296,7 +296,7 @@ class NewMember extends Component {
                       .getMemberAddress(bytes32MemberId)
                       .call();
                     console.log(
-                      "Dirección del contrato para este Id: ",
+                      "Contract address for this member ID: ",
                       memberAddress
                     );
                     if (
@@ -472,8 +472,8 @@ class NewMember extends Component {
           }
         });
       }
-    } catch (err) {
-      this.setState({ loading: false, errorMessage: err.message });
+    } catch (error) {
+      this.setState({ loading: false, errorMessage: error.message });
     }
   };
 
@@ -516,6 +516,7 @@ class NewMember extends Component {
                 onKeyPress={(e) => {
                   e.key === "Enter" && e.preventDefault();
                 }}
+                style={{ width: 500 }}
               />
             </Form.Field>
           </Form.Group>
@@ -582,7 +583,12 @@ class NewMember extends Component {
             </Form.Field>
             <Form.Field>
               <label>País</label>
-              <Input placeholder="País" value={this.state.country} disabled />
+              <input
+                placeholder="País"
+                value={this.state.country}
+                disabled
+                style={{ width: 300, background: "#F7F8F8" }}
+              />
             </Form.Field>
           </Form.Group>
           <Form.Field>
