@@ -1,6 +1,6 @@
 
 import React, { Component } from 'react';
-import Pdf from "../../assets/docs/UsingMetaMaskGuide.pdf";
+import Pdf from "../../assets/docs/MetaMaskCompleteGuide.pdf";
 import styles from '../../assets/css/MetaMask.module.css';
 
 class MetaMaskInfo extends Component {
