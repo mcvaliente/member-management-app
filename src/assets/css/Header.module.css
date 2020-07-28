@@ -33,7 +33,7 @@
     padding: 0;
     box-shadow: none;
     cursor: pointer;
-}
+ }
 
 .headerButton:disabled {
     float: right;
@@ -65,7 +65,7 @@
 }
 
 .headerButtonText {
-    margin-left: 10px;
+    margin-left: 2px;
     color: #FFFF;
     font-family: Lato;
     font-size: 17px;

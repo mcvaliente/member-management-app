@@ -2,11 +2,9 @@ import React, { Component } from "react";
 import swal from "sweetalert";
 
 class MemberInfo extends Component {
-
-    componentDidMount(){
-        console.log("Member to search: ", this.props.memberId);
-    }
- 
+  componentDidMount() {
+    console.log("Member to search: ", this.props.memberId);
+  }
 
   searchMemberHandler() {
     //First, Check if the memberId is in the blockchain
@@ -15,7 +13,12 @@ class MemberInfo extends Component {
       //TODO: Redirect to the member page.
     } catch (error) {
       this.setState({ loading: false });
-      swal("Error", error.message, "error");
+      swal({
+        title: "Error",
+        text: error.message,
+        icon: "error",
+        button: "Aceptar",
+      });
     }
   }
 
@@ -34,7 +37,9 @@ class MemberInfo extends Component {
           onKeyPress={this.keyPressHandler}
         />
         <i aria-hidden="true" className="search icon"></i>
-        {this.state.memberId ? <MemberInfo memberId = {this.state.memberId} /> : null}
+        {this.state.memberId ? (
+          <MemberInfo memberId={this.state.memberId} />
+        ) : null}
       </div>
     );
   }

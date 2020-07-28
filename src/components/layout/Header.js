@@ -26,7 +26,7 @@ const Header = (props) => {
           <Grid.Column
             width={2}
             floated="right"
-            style={{ marginTop: 20, textAlign: "right" }}
+            style={{ marginTop: 20, marginRight: 20, textAlign: "right" }}
           >
             <MetaMaskInfo messageInfo="¿Tienes dudas?" />
           </Grid.Column>
@@ -49,7 +49,7 @@ const Header = (props) => {
             </button>
           </Grid.Column>
         ) : (
-          <Grid.Column floated="right" width={4}>
+          <Grid.Column floated="right" width={2}>
             <button
               id="btnMetaMaskConnect"
               className={styles.headerButton}

@@ -46,7 +46,7 @@ class NewMember extends Component {
     occupationCategoryList: [],
     categoryList: [],
     loading: false,
-    errorMessage: ""
+    errorMessage: "",
   };
 
   componentDidMount() {
@@ -257,14 +257,13 @@ class NewMember extends Component {
 
       if (validMember) {
         //All the fields are OK.
-        //swal("Form successfully filled!");
         //Request confirmation from the user in order to save the member in the Blockchain.
         swal({
           title: "¿Continuar?",
           text:
             "Se va a proceder al registro del nuevo/a socio/a en la Blockchain de Rinkeby Test Network.",
           icon: "warning",
-          buttons: true,
+          buttons: ["Cancelar", "Aceptar"],
           dangerMode: true,
         }).then(async (willContinue) => {
           if (willContinue) {
@@ -277,11 +276,13 @@ class NewMember extends Component {
                 //Check account.
                 const accounts = await web3.eth.getAccounts();
                 if (accounts.length === 0) {
-                  swal(
-                    "Error",
-                    "Por favor, conéctate a una cuenta de MetaMask para poder realizar el registro.",
-                    "error"
-                  );
+                  swal({
+                    title: "Error",
+                    text:
+                      "Por favor, conéctate a una cuenta de MetaMask para poder realizar el registro.",
+                    icon: "error",
+                    button: "Aceptar",
+                  });
                 } else {
                   console.log("Web3 accounts: ", accounts);
                   const isRinkeby = checkRinkebyNetwork();
@@ -304,11 +305,13 @@ class NewMember extends Component {
                       "0x0000000000000000000000000000000000000000"
                     ) {
                       this.setState({ loading: false });
-                      swal(
-                        "Error",
-                        "Ya existe una persona socia con la misma identificación.",
-                        "error"
-                      );
+                      swal({
+                        title: "Error",
+                        text:
+                          "Ya existe una persona socia con la misma identificación.",
+                        icon: "error",
+                        button: "Aceptar",
+                      });
                     } else {
                       //Create the new member indicating the creator of this member.
                       await factory.methods.createMember(bytes32MemberId).send({
@@ -444,30 +447,39 @@ class NewMember extends Component {
 
                       swal(
                         "¡Proceso completo!",
-                        "El nuevo/a socio/a se ha registrado en la Blockchain sin ninguna incidencia.",
+                        "La persona socia se ha registrado en la Blockchain sin ninguna incidencia.",
                         "success"
                       );
                     }
                   } else {
                     this.setState({ loading: false, errorMessage: "" });
-                    swal(
-                      "Error",
-                      "Por favor, selecciona la red Rinkeby para poder realizar el registro",
-                      "error"
-                    );
+                    swal({
+                      title: "Error",
+                      text:
+                        "Por favor, selecciona la red Rinkeby para poder realizar el registro.",
+                      icon: "error",
+                      button: "Aceptar",
+                    });
                   }
                 }
               } else {
                 this.setState({ loading: false, errorMessage: "" });
-                swal(
-                  "Error",
-                  "Se ha producido un error al intentar conectarse a la instancia de MetaMask.",
-                  "error"
-                );
+                swal({
+                  title: "Error",
+                  text:
+                    "Se ha producido un error al intentar conectarse a la instancia de MetaMask.",
+                  icon: "error",
+                  button: "Aceptar",
+                });
               }
             } catch (error) {
               this.setState({ loading: false });
-              swal("Error", error.message, "error");
+              swal({
+                title: "Error",
+                text: error.message,
+                icon: "error",
+                button: "Aceptar",
+              });
             }
           }
         });

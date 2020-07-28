@@ -28,11 +28,13 @@ class SearchMemberBar extends Component {
         //Check account.
         const accounts = await web3.eth.getAccounts();
         if (accounts.length === 0) {
-          swal(
-            "Error",
-            "Por favor, conéctate a una cuenta de MetaMask para poder realizar el registro.",
-            "error"
-          );
+          swal({
+            title: "Error",
+            text:
+              "Por favor, conéctate a una cuenta de MetaMask para poder realizar el registro.",
+            icon: "error",
+            button: "Aceptar",
+          });
         } else {
           const isRinkeby = checkRinkebyNetwork();
           if (isRinkeby) {
@@ -46,8 +48,8 @@ class SearchMemberBar extends Component {
             if (
               memberAddress !== "0x0000000000000000000000000000000000000000"
             ) {
-				//The member ID has been found in the blockchain.
-				//TODO: Redirect to the page that get the info of this member an displays it.
+              //The member ID has been found in the blockchain.
+              //TODO: Redirect to the page that get the info of this member an displays it.
               swal(
                 "¡Miembro a buscar!",
                 "Se va a proceder a buscar el socio/a con identificación '" +
@@ -56,35 +58,46 @@ class SearchMemberBar extends Component {
                 "success"
               );
             } else {
-              swal(
-                "Error",
-                "El socio/a con identificación '" +
+              swal({
+                title: "Error",
+                text:
+                  "La persona socia con identificación '" +
                   memberId +
-                  "' no se encuentra registrado en el sistema.",
-                "error"
-              );
+                  "' no se encuentra registrada en el sistema.",
+                icon: "error",
+                button: "Aceptar",
+              });
             }
           } else {
             this.setState({ loading: false, errorMessage: "" });
-            swal(
-              "Error",
-              "Por favor, selecciona la red Rinkeby para poder realizar el registro",
-              "error"
-            );
+            swal({
+              title: "Error",
+              text:
+                "Por favor, selecciona la red Rinkeby para poder realizar el registro.",
+              icon: "error",
+              button: "Aceptar",
+            });
           }
         }
       } else {
         this.setState({ loading: false, errorMessage: "" });
-        swal(
-          "Error",
-          "Se ha producido un error al intentar conectarse a la instancia de MetaMask.",
-          "error"
-        );
+        swal({
+          title: "Error",
+          text:
+            "Se ha producido un error al intentar conectarse a la instancia de MetaMask.",
+          icon: "error",
+          button: "Aceptar",
+        });
       }
       this.setState({ loading: false });
     } catch (error) {
       this.setState({ loading: false });
-      swal("Error", error.message, "error");
+      swal({
+        title: "Error",
+        text: error.message,
+        icon: "error",
+        button: "Aceptar",
+      });
     }
   };
 
