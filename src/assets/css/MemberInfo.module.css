@@ -26,8 +26,8 @@
 }
 
 .memberInfoButton:disabled {
-    background-color: #F2F3F4 !important;
-    border: 2px solid #F2F3F4 !important;
+    background-color: #DDDDDD !important;
+    border: 2px solid #DDDDDD !important;
     border-radius: 4px;
     vertical-align: middle;
     width: 90px;

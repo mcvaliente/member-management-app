@@ -51,8 +51,7 @@ contract Member {
     struct MemberInfo {
         PersonalInfo personalData; //NIF/NIE, name, surname, birthdate
         LocationInfo memberLocation; //office, county, country
-        mapping(uint256 => bytes32) occupations;
-        uint256 totalOccupations;
+        bytes32[] occupations;
         bytes32 acceptanceDate; //dd/mm/aaaa
         bool isActive;
     }
@@ -92,14 +91,11 @@ contract Member {
         });
 
         MemberInfo memory newMember = MemberInfo({
-            personalData: personalData, memberLocation: locationData, totalOccupations: occupations.length, acceptanceDate: acceptanceDate, isActive: true
+            personalData: personalData, memberLocation: locationData, occupations : occupations, acceptanceDate: acceptanceDate, isActive: true
         });
 
         memberInfo = newMember;
 
-        for (uint256 i = 0; i < occupations.length; i++) {
-            memberInfo.occupations[i] = occupations[i];
-        }
     }
 
     function getMemberSummary()
@@ -114,7 +110,6 @@ contract Member {
             string memory,
             string memory,
             string memory,
-            uint256,
             bool
         )
     {
@@ -127,13 +122,12 @@ contract Member {
             memberInfo.memberLocation.office,
             memberInfo.memberLocation.county,
             memberInfo.memberLocation.country,
-            memberInfo.totalOccupations,
             memberInfo.isActive
         );
     }
 
-    function getMemberOccupation(uint256 occupationIndex) public view returns (bytes32)
+    function getMemberOccupations() public view returns (bytes32[] memory)
     {
-        return memberInfo.occupations[occupationIndex];
+        return memberInfo.occupations;
     }
 }

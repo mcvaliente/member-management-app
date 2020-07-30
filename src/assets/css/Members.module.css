@@ -9,7 +9,7 @@
     margin: auto !important;
 }
 
-.NewMemberButton {
+.MembersButton {
     background-color: #979EA2;
     border: 2px solid #979EA2;
     border-radius: 4px;
@@ -24,11 +24,11 @@
     height: 40px;
 }
 
-.NewMemberButton:hover {
+.MembersButton:hover {
     color: #ffffff;
 }
 
-.NewMemberButton:disabled {
+.MembersButton:disabled {
     background-color: #DDDDDD;
     color: #ffffff;
     border: 2px solid #DDDDDD;

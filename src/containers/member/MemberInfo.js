@@ -11,8 +11,7 @@ import { Grid, Divider, GridColumn } from "semantic-ui-react";
 import { NavLink } from "react-router-dom";
 import {
   getWeb3,
-  checkRinkebyNetwork,
-  getCurrentAccount,
+  checkRinkebyNetwork
 } from "../../contracts/web3";
 import swal from "sweetalert";
 import factory from "../../contracts/factory";
@@ -67,7 +66,6 @@ const MemberInfo = (props) => {
             const isRinkeby = checkRinkebyNetwork();
             if (isRinkeby){
               //Get the current account.
-              const currentAccount = getCurrentAccount();
               const bytes32MemberId = web3.utils.fromAscii(memberID);
               //Get the contract address for this member.
               const memberContractAddress = await factory.methods
@@ -84,13 +82,19 @@ const MemberInfo = (props) => {
                 });
                 setReturnMainPage(true);
               } else {
-                //Check the member info stored in the blockchain.
+                //Get the member info stored in the blockchain.
                 const member = Member(memberContractAddress);
                 const memberInfo = await member.methods
                   .getMemberSummary()
                   .call();
                 const result = "[" + JSON.stringify(memberInfo) + "]";
                 ReadMemberSummaryFields(web3, result);
+                //Get the member occupations.
+                const memberOccupations = await member.methods
+                  .getMemberOccupations()
+                  .call();
+                ReadMemberOccupations(web3, memberOccupations);
+
               }             
             } else {
               swal({
@@ -124,33 +128,16 @@ const MemberInfo = (props) => {
     function ReadMemberSummaryFields(web3, memberData){
       console.log("Member info: ", memberData);
       const jsonOutput = JSON.parse(memberData);
-      let totalOccupations = 0;
       for (var j = 0; j < jsonOutput.length; j++) {
-        console.log(
-          "NIF/NIE: ",
-          web3.utils.toAscii(jsonOutput[j]["0"])
-        );
-        totalOccupations = parseInt(jsonOutput[j]["8"], 10);
-        console.log(
-          "Total occupations of the member: ",
-          totalOccupations
-        );        
+        console.log("NIF/NIE: ", web3.utils.toAscii(jsonOutput[j]["0"]));
       }
-      //Member occupations
-      let memberOccupation;
-      for (var l = 0; l < totalOccupations; l++) {
-        memberOccupation = await member.methods
-          .getMemberOccupation(l)
-          .call();
-        console.log(
-          "Member occupation (",
-          l,
-          "):",
-          web3.utils.toAscii(memberOccupation)
-        );
+    }
+
+    function ReadMemberOccupations(web3, memberData){
+      console.log("Member occupations: ", memberData);
+      for (var i = 0; i < memberData.length; i++) {
+        console.log("Occupation(" , i, "): ", web3.utils.toAscii(memberData[i]));
       }
-
-
     }
 
     //Get the member info from the blockchain.
@@ -179,26 +166,27 @@ const MemberInfo = (props) => {
   return (
     <div className={styles.MemberInfo}>
       <NavLink to="/">Volver</NavLink>
-      <Divider style={{ width: 800 }} />
       <Grid>
         <Grid.Row>
-          <Grid.Column width={8} style={{ marginTop: 10 }}>
+          <Divider />
+          <Grid.Column width={7} style={{ marginTop: 10 }}>
             <span className={styles.memberInfoSpan}>
               Hemos encontrado un resultado con NIF/NIE: <strong>{id}</strong>
             </span>
           </Grid.Column>
-          <Grid.Column width={7}>
+          <Grid.Column width={3}>
             {props.metaMaskConnected ? (
-              <button className={styles.memberInfoButton}>Editar perfil</button>
+              /*TODO: Quitar la propiedad 'disabled' cuando implemente la edición*/
+              <button className={styles.memberInfoButton} disabled>Editar perfil</button>
             ) : (
               <button className={styles.memberInfoButton} disabled>
                 Editar perfil
               </button>
             )}
           </Grid.Column>
+          <Divider />
         </Grid.Row>
       </Grid>
-      <Divider style={{ width: 800 }} />
     </div>
   );
 };

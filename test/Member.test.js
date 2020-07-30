@@ -24,7 +24,7 @@ beforeEach(async () => {
   memberId = await web3.utils.fromAscii("70006672P");
   birthdate = await web3.utils.fromAscii("11/03/1991");
   acceptanceDate = await web3.utils.fromAscii("17/07/2020");
-  occupation1 = await web3.utils.fromAscii("Actriz /Actor");
+  occupation1 = await web3.utils.fromAscii("Actor/Actriz");
   occupation2 = await web3.utils.fromAscii("Bailarín/a");
   occupations = [occupation1, occupation2];
 
@@ -103,13 +103,16 @@ describe("Members", () => {
     }
   });
 
-  it("gets the first occupation of a new member", async () => {
+  it("gets the occupations of a new member", async () => {
     try {
-      const memberOccupation = await member.methods
-        .getMemberOccupation(0)
+      const memberOccupations = await member.methods
+        .getMemberOccupations()
         .call();
-      console.log("Member occupation", web3.utils.toAscii(memberOccupation));
-      assert(web3.utils.fromAscii("Actriz /Actor"), memberOccupation);
+      console.log("Member occupations: ", memberOccupations);
+      for (var i = 0; i < memberOccupations.length; i++) {
+        console.log("Occupation (", i, "): ", web3.utils.toAscii(memberOccupations[i]));
+      }
+      assert(web3.utils.fromAscii("Actor/Actriz"), web3.utils.toAscii(memberOccupations[0]));
     } catch (err) {
       console.log("Catched exception: ", err);
       assert.ok(err);
