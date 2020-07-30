@@ -1,0 +1,41 @@
+.MemberInfo {
+    margin: 50px;
+    padding: 20px;
+    font-size: 13px;
+}
+
+.memberInfoSpan {
+    margin-top: 20px;
+}
+
+.memberInfoButtonSection {
+    text-align: center;
+}
+
+.memberInfoButton {
+    background-color: #919192 !important;
+    border: 2px solid #919192 !important;
+    border-radius: 4px;
+    vertical-align: middle;
+    width: 90px;
+    height: 40px;
+    padding: 0;
+    box-shadow: none;
+    cursor: pointer;
+    color: #FFFF;
+}
+
+.memberInfoButton:disabled {
+    background-color: #F2F3F4 !important;
+    border: 2px solid #F2F3F4 !important;
+    border-radius: 4px;
+    vertical-align: middle;
+    width: 90px;
+    height: 40px;
+    padding: 0;
+    cursor: not-allowed;
+}
+
+.memberInfoOccupationSelectedList {
+    margin: 20px auto;
+}

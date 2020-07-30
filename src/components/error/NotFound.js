@@ -3,8 +3,6 @@ import { Grid } from 'semantic-ui-react';
 import { NavLink } from 'react-router-dom';
 import styles from '../../assets/css/NotFound.module.css';
 
-
-
 const srcNotFoundImg = '/images/404-error-icon.png';
 
 export default () => {

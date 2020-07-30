@@ -91,3 +91,13 @@ p {
 .swal-button--danger:not([disabled]):hover {
   background-color: #e64942 !important;
 }
+
+/**Center buttons in the window**/
+.swal-footer{
+  text-align: center;
+}
+
+/**Center text in the window.**/
+.swal-text {
+  text-align: center;
+}

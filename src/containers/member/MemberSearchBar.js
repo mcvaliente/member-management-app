@@ -2,17 +2,18 @@ import React, { Component } from "react";
 import { getWeb3, checkRinkebyNetwork } from "../../contracts/web3";
 import factory from "../../contracts/factory";
 import swal from "sweetalert";
+import { Redirect } from "react-router-dom";
 
-class SearchMemberBar extends Component {
+class MemberSearchBar extends Component {
+
   state = {
-    memberId: "",
-    loading: false,
+    memberId: '',
+    loading: false
   };
 
   keyPressHandler = (e) => {
     if (e.key === "Enter") {
       console.log("Member to search: " + e.target.value);
-      this.setState({ memberId: e.target.value });
       //Check if we have this member Id in the blockchain.
       this.memberSearchHandler(e.target.value);
     }
@@ -28,6 +29,7 @@ class SearchMemberBar extends Component {
         //Check account.
         const accounts = await web3.eth.getAccounts();
         if (accounts.length === 0) {
+          this.setState({ loading : false });
           swal({
             title: "Error",
             text:
@@ -45,31 +47,27 @@ class SearchMemberBar extends Component {
               .getMemberAddress(bytes32MemberId)
               .call();
             console.log("Contract address for this member ID: ", memberAddress);
+            this.setState({ loading : false })
             if (
               memberAddress !== "0x0000000000000000000000000000000000000000"
             ) {
               //The member ID has been found in the blockchain.
-              //TODO: Redirect to the page that get the info of this member an displays it.
-              swal(
-                "¡Miembro a buscar!",
-                "Se va a proceder a buscar el socio/a con identificación '" +
-                  memberId +
-                  "'.",
-                "success"
-              );
+              //We assign the value to this.state.memberId in order to redirect
+              //to the member page.
+                this.setState({ memberId });
             } else {
               swal({
                 title: "Error",
                 text:
                   "La persona socia con identificación '" +
                   memberId +
-                  "' no se encuentra registrada en el sistema.",
+                  "' no se encuentra registrada.",
                 icon: "error",
                 button: "Aceptar",
               });
             }
           } else {
-            this.setState({ loading: false, errorMessage: "" });
+            this.setState({ loading: false });
             swal({
               title: "Error",
               text:
@@ -80,7 +78,7 @@ class SearchMemberBar extends Component {
           }
         }
       } else {
-        this.setState({ loading: false, errorMessage: "" });
+        this.setState({ loading: false });
         swal({
           title: "Error",
           text:
@@ -89,7 +87,6 @@ class SearchMemberBar extends Component {
           button: "Aceptar",
         });
       }
-      this.setState({ loading: false });
     } catch (error) {
       this.setState({ loading: false });
       swal({
@@ -102,6 +99,10 @@ class SearchMemberBar extends Component {
   };
 
   render() {
+    if (!!this.state.memberId){
+      return <Redirect to={`/member/${this.state.memberId}`}></Redirect>
+    }
+
     return (
       <div
         className={
@@ -121,4 +122,4 @@ class SearchMemberBar extends Component {
   }
 }
 
-export default SearchMemberBar;
+export default MemberSearchBar;

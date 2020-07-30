@@ -2,55 +2,66 @@
 pragma solidity >=0.4.22 <0.7.0;
 
 contract MemberFactory {
-
     Member[] private deployedMembers;
     mapping(bytes32 => Member) memberAddresses;
 
-    function createMember(bytes32 memberId) public {
-        Member newMember = new Member(msg.sender);
+    function createMember(
+        bytes32 memberId,
+        string memory name,
+        string memory surname,
+        bytes32 birthdate,
+        string memory office,
+        string memory county,
+        string memory country,
+        bytes32[] memory occupations,
+        bytes32 acceptanceDate
+    ) public {
+        //Create the contract instance.
+        Member newMember = new Member();
         memberAddresses[memberId] = newMember;
         deployedMembers.push(newMember);
-     }
+        //Add the member information.
+        newMember.addMemberInformation(
+            memberId,
+            name,
+            surname,
+            birthdate,
+            office,
+            county,
+            country,
+            occupations,
+            acceptanceDate
+        );
+    }
 
     function getDeployedMembers() public view returns (Member[] memory) {
         return deployedMembers;
     }
 
-    function getMemberCount() public view returns (uint){
+    function getMemberCount() public view returns (uint256) {
         return deployedMembers.length;
     }
 
-    function getMemberAddress(bytes32 memberId) public view returns (Member){
+    function getMemberAddress(bytes32 memberId) public view returns (Member) {
         return memberAddresses[memberId];
     }
 }
 
-contract Ownable {
-
-    //Address that deploys the contract (i.e., the owner of the contract).
-    address owner;
-    mapping (address => bool) grantedUsers;
-
-    modifier onlyOwner(address userAccount){
-        require(
-            owner == userAccount,
-            "ERROR_NOT_OWNER."
-        );
-        _;
+contract Member {
+    struct MemberInfo {
+        PersonalInfo personalData; //NIF/NIE, name, surname, birthdate
+        LocationInfo memberLocation; //office, county, country
+        mapping(uint256 => bytes32) occupations;
+        uint256 totalOccupations;
+        bytes32 acceptanceDate; //dd/mm/aaaa
+        bool isActive;
     }
-}
 
-contract Member is Ownable {
-
-    struct BasicInfo {
+    struct PersonalInfo {
         bytes32 memberId; //NIF/NIE
+        bytes32 birthdate; //dd/mm/aaaa
         string name;
         string surname;
-        bytes32 birthdate; //dd/mm/aaaa
-        bytes32 acceptanceDate; //dd/mm/aaaa
-        uint totalOccupations;
-        mapping (uint => string) occupations;
-        bool isActive;
     }
 
     struct LocationInfo {
@@ -59,70 +70,70 @@ contract Member is Ownable {
         string country;
     }
 
-    BasicInfo memberInfo;
-    LocationInfo memberLocation;
+    MemberInfo memberInfo;
 
-    constructor (address creator) public{
-        owner = creator;
-    }
+    function addMemberInformation(
+        bytes32 memberId,
+        string memory name,
+        string memory surname,
+        bytes32 birthdate,
+        string memory office,
+        string memory county,
+        string memory country,
+        bytes32[] memory occupations,
+        bytes32 acceptanceDate
+    ) public {
+        PersonalInfo memory personalData = PersonalInfo({
+            memberId: memberId, birthdate: birthdate, name: name, surname: surname
+        });
 
-    function addMemberBasicInformation(bytes32 memberId, string memory name, string memory surname,
-                            bytes32 birthdate, bytes32 acceptanceDate) public onlyOwner (msg.sender) {
-        BasicInfo memory newMember = BasicInfo({
-            memberId: memberId,
-            name: name,
-            surname: surname,
-            birthdate: birthdate,
-            acceptanceDate: acceptanceDate,
-            totalOccupations: 0,
-            isActive: true
+        LocationInfo memory locationData = LocationInfo({
+            office: office, county: county, country: country
+        });
+
+        MemberInfo memory newMember = MemberInfo({
+            personalData: personalData, memberLocation: locationData, totalOccupations: occupations.length, acceptanceDate: acceptanceDate, isActive: true
         });
 
         memberInfo = newMember;
+
+        for (uint256 i = 0; i < occupations.length; i++) {
+            memberInfo.occupations[i] = occupations[i];
+        }
     }
 
-    function addMemberOccupation(string memory occupation) public onlyOwner (msg.sender) {
-        uint occupationNumber = memberInfo.totalOccupations;
-        memberInfo.occupations[occupationNumber] = occupation;
-        memberInfo.totalOccupations = occupationNumber + 1;
-    }
-
-    function addMemberLocation(string memory county, string memory office, string memory country) public onlyOwner (msg.sender) {
-
-        LocationInfo memory newMemberLocation = LocationInfo({
-            county: county,
-            office: office,
-            country:country
-        });
-        memberLocation = newMemberLocation;
-    }
-
-    function getMemberSummary() public view returns(bytes32, string memory,
-                                                    string memory, bytes32, bytes32, uint, bool)
+    function getMemberSummary()
+        public
+        view
+        returns (
+            bytes32,
+            bytes32,
+            bytes32,
+            string memory,
+            string memory,
+            string memory,
+            string memory,
+            string memory,
+            uint256,
+            bool
+        )
     {
-
         return (
-            memberInfo.memberId,
-            memberInfo.name,
-            memberInfo.surname,
-            memberInfo.birthdate,
+            memberInfo.personalData.memberId,
+            memberInfo.personalData.birthdate,
             memberInfo.acceptanceDate,
+            memberInfo.personalData.name,
+            memberInfo.personalData.surname,
+            memberInfo.memberLocation.office,
+            memberInfo.memberLocation.county,
+            memberInfo.memberLocation.country,
             memberInfo.totalOccupations,
             memberInfo.isActive
         );
     }
 
-    function getMemberOccupation(uint occupationIndex) public view returns (string memory) {
+    function getMemberOccupation(uint256 occupationIndex) public view returns (bytes32)
+    {
         return memberInfo.occupations[occupationIndex];
     }
-
-    function getMemberLocation() public view returns (string memory, string memory, string memory ) {
-        return (
-            memberLocation.office,
-            memberLocation.county,
-            memberLocation.country
-        );
-    }
-
 }
-

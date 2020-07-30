@@ -1,11 +1,11 @@
 import React, { Component } from "react";
 import { Form, Input, Message, Icon } from "semantic-ui-react";
-import { NavLink } from "react-router-dom";
+import { NavLink, Redirect } from "react-router-dom";
 import styles from "../../assets/css/NewMember.module.css";
 import {
   counties,
   offices,
-  categories,
+  occupationCategories,
   occupations,
 } from "../../utils/smartconfig";
 import {
@@ -23,30 +23,30 @@ import {
 } from "../../contracts/web3";
 import swal from "sweetalert";
 import factory from "../../contracts/factory";
-import Member from "../../contracts/member";
 import { Loader } from "../../utils/smartloader";
 import MemberOccupations from "../../components/members/member/MemberOccupations";
 
 class NewMember extends Component {
   state = {
-    name: "",
-    surname: "",
-    memberID: "",
-    birthdate: "",
-    county: "",
-    office: "",
-    country: "España",
-    email: "",
-    occupations: [],
-    acceptanceDate: "",
+    name: '',
+    surname: '',
+    memberID: '',
+    birthdate: '',
+    county: '',
+    office: '',
+    country: 'España',
+    email: '',
+    selectedOccupations: [],
+    acceptanceDate: '',
     countyList: [],
     officeList: [],
-    currentCategory: "",
-    currentOccupation: "",
+    currentCategory: '',
+    currentOccupation: '',
     occupationCategoryList: [],
     categoryList: [],
     loading: false,
-    errorMessage: "",
+    errorMessage: '',
+    returnMainPage: false,
   };
 
   componentDidMount() {
@@ -60,7 +60,7 @@ class NewMember extends Component {
 
     //Categories
     this.setState({ currentCategory: "categorySelection" });
-    this.setState({ categoryList: categories });
+    this.setState({ categoryList: occupationCategories });
 
     //Occupations
     this.setState({ currentOccupation: "occupationSelection" });
@@ -94,20 +94,20 @@ class NewMember extends Component {
   occupationSelectHandler = (e) => {
     //console.log("Selected occupation: " + e.target.value);
     if (e.target.value !== "occupationSelection") {
-      const occupationsList = [...this.state.occupations];
+      const occupationsList = [...this.state.selectedOccupations];
       this.setState({ currentOccupation: e.target.value });
       //Check if the occupation is in the list yet.
       if (!occupationsList.includes(e.target.value)) {
         occupationsList.push(e.target.value);
-        this.setState({ occupations: occupationsList });
+        this.setState({ selectedOccupations: occupationsList });
       }
     }
   };
 
   deleteMemberOccupationHandler = (occupationIndex) => {
-    const occupations = [...this.state.occupations];
+    const occupations = [...this.state.selectedOccupations];
     occupations.splice(occupationIndex, 1);
-    this.setState({ occupations: occupations });
+    this.setState({ selectedOccupations: occupations });
   };
 
   onSubmit = async (e) => {
@@ -123,7 +123,7 @@ class NewMember extends Component {
       county,
       office,
       email,
-      occupations,
+      selectedOccupations,
       acceptanceDate,
     } = this.state;
 
@@ -204,7 +204,7 @@ class NewMember extends Component {
           if (!validMember) {
             this.setState({
               errorMessage:
-                "Por favor, selecciona la delegación a la que pertecen el nuevo/a socio/a.",
+                "Por favor, selecciona la delegación a la que pertenece el nuevo/a socio/a.",
             });
           }
         }
@@ -223,8 +223,7 @@ class NewMember extends Component {
       //Check occupations.
       if (validMember) {
         if (validMember) {
-          console.log("Occupations: ", occupations);
-          validMember = checkListField(occupations);
+          validMember = checkListField(selectedOccupations);
           if (!validMember) {
             this.setState({
               errorMessage:
@@ -261,14 +260,14 @@ class NewMember extends Component {
         swal({
           title: "¿Continuar?",
           text:
-            "Se va a proceder al registro del nuevo/a socio/a en la Blockchain de Rinkeby Test Network.",
+            "Se va a proceder al registro de la persona socia en la Blockchain de Rinkeby Test Network.",
           icon: "warning",
           buttons: ["Cancelar", "Aceptar"],
           dangerMode: true,
         }).then(async (willContinue) => {
           if (willContinue) {
             //Show loading and reset the error message to an empty string.
-            this.setState({ loading: true, errorMessage: "" });
+            this.setState({ loading: true, errorMessage: '' });
             try {
               const web3 = getWeb3();
               //We have to check if web3 has a value.
@@ -276,6 +275,7 @@ class NewMember extends Component {
                 //Check account.
                 const accounts = await web3.eth.getAccounts();
                 if (accounts.length === 0) {
+                  this.setState({loading : false, errorMessage : ''});
                   swal({
                     title: "Error",
                     text:
@@ -304,7 +304,7 @@ class NewMember extends Component {
                       memberAddress !==
                       "0x0000000000000000000000000000000000000000"
                     ) {
-                      this.setState({ loading: false });
+                      this.setState({ loading: false, errorMessage : '' });
                       swal({
                         title: "Error",
                         text:
@@ -314,48 +314,27 @@ class NewMember extends Component {
                       });
                     } else {
                       //Create the new member indicating the creator of this member.
-                      await factory.methods.createMember(bytes32MemberId).send({
-                        from: currentAccount,
-                        gas: "2000000",
-                      });
-
-                      //Check that the member has been included.
-                      const memberContractAddress = await factory.methods
-                        .getMemberAddress(bytes32MemberId)
-                        .call();
-                      console.log(
-                        "Member contract address: " + memberContractAddress
-                      );
-                      //Total members.
-                      const memberCount = await factory.methods
-                        .getMemberCount()
-                        .call();
-                      console.log("Total members: " + memberCount);
-                      //Check the deployed members.
-                      const smartMembers = await factory.methods
-                        .getDeployedMembers()
-                        .call();
-                      let count = 1;
-                      smartMembers.map((address) => {
-                        console.log("member(" + count + "): " + address);
-                        count++;
-                        return true;
-                      });
-
-                      //Now we can store the member data in the blockchain
-                      const member = Member(memberContractAddress);
                       const bytes32Birthdate = web3.utils.fromAscii(
                         this.state.birthdate
                       );
                       const bytes32AcceptanceDate = web3.utils.fromAscii(
                         this.state.acceptanceDate
                       );
-                      await member.methods
-                        .addMemberBasicInformation(
+                      let bytes32Occupations = this.state.selectedOccupations.map(
+                        (occupation) => {
+                          return web3.utils.fromAscii(occupation);
+                        }
+                      );
+                      await factory.methods
+                        .createMember(
                           bytes32MemberId,
                           this.state.name,
                           this.state.surname,
                           bytes32Birthdate,
+                          this.state.office,
+                          this.state.county,
+                          this.state.country,
+                          bytes32Occupations,
                           bytes32AcceptanceDate
                         )
                         .send({
@@ -363,96 +342,46 @@ class NewMember extends Component {
                           gas: "2000000",
                         });
 
-                      //Add the location
-                      await member.methods
-                        .addMemberLocation(
-                          this.state.county,
-                          this.state.office,
-                          this.state.country
-                        )
-                        .send({
-                          from: currentAccount,
-                          gas: "1000000",
-                        });
-
-                      //Add the occupations
-                      for (var i = 0; i < this.state.occupations.length; i++) {
-                        await member.methods
-                          .addMemberOccupation(occupations[i])
-                          .send({
-                            from: currentAccount,
-                            gas: "1000000",
-                          });
-                      }
-
-                      //Check the member info stored in the blockchain.
-                      const memberInfo = await member.methods
-                        .getMemberSummary()
-                        .call();
-                      const output = "[" + JSON.stringify(memberInfo) + "]";
-                      console.log("Member info: ", output);
-                      const jsonOutput = JSON.parse(output);
-                      let totalOccupations = 0;
-                      for (var j = 0; j < jsonOutput.length; j++) {
-                        console.log(
-                          "NIF/NIE: ",
-                          web3.utils.toAscii(jsonOutput[j]["0"])
-                        );
-                        totalOccupations = parseInt(jsonOutput[j]["5"], 10);
-                        console.log("Total occupations: ", totalOccupations);
-                      }
-
-                      //Member location
-                      const memberLocation = await member.methods
-                        .getMemberLocation()
-                        .call();
-                      const outputLocation = JSON.stringify(memberLocation);
-                      console.log("Member location: ", outputLocation);
-                      const jsonOutputLocation = JSON.parse(outputLocation);
-                      console.log("Office: ", jsonOutputLocation["0"]);
-                      console.log("County: ", jsonOutputLocation["1"]);
-                      console.log("Country: ", jsonOutputLocation["2"]);
-
-                      //Member occupations
-                      let memberOccupation;
-                      for (var l = 0; l < totalOccupations; l++) {
-                        memberOccupation = await member.methods
-                          .getMemberOccupation(l)
-                          .call();
-                        console.log(
-                          "Member occupation (",
-                          l,
-                          "):",
-                          memberOccupation
-                        );
-                      }
-
                       // TODO: Add the functionality to store the files in IPFS.
 
-                      //Reset the form fields.
-                      this.setState({
-                        loading: false,
-                        name: "",
-                        surname: "",
-                        memberID: "",
-                        birthdate: "",
-                        county: "",
-                        office: "",
-                        email: "",
-                        occupations: [],
-                        acceptanceDate: "",
-                        currentCategory: "categorySelection",
-                        currentOccupation: "occupationSelection",
+                      this.setState({ loading: false, errorMessage: '' });
+                      swal({
+                        title:
+                          "Has añadido a este socio/a correctamente.",
+                        text: "¿Qué quieres hacer ahora?",
+                        icon: "success",
+                        buttons: [
+                          "Volver a la pantalla principal",
+                          "Añadir socio/a",
+                        ],
+                      }).then(async (willContinue) => {
+                        if (willContinue) {
+                          //Add a new member.
+                          //Reset the form fields.
+                          this.setState({
+                            name: '',
+                            surname: '',
+                            memberID: '',
+                            birthdate: '',
+                            county: '',
+                            office: '',
+                            country: 'España',
+                            email: '',
+                            selectedOccupations: [],
+                            acceptanceDate: '',
+                            currentCategory: 'categorySelection',
+                            categoryList: occupationCategories,
+                            currentOccupation: 'occupationCategories',
+                            occupationCategoryList: occupations
+                          });
+                        } else {
+                          //Return to the main page.
+                          this.setState({ returnMainPage: true });
+                        }
                       });
-
-                      swal(
-                        "¡Proceso completo!",
-                        "La persona socia se ha registrado en la Blockchain sin ninguna incidencia.",
-                        "success"
-                      );
                     }
                   } else {
-                    this.setState({ loading: false, errorMessage: "" });
+                    this.setState({ loading: false, errorMessage: '' });
                     swal({
                       title: "Error",
                       text:
@@ -463,7 +392,7 @@ class NewMember extends Component {
                   }
                 }
               } else {
-                this.setState({ loading: false, errorMessage: "" });
+                this.setState({ loading: false, errorMessage: '' });
                 swal({
                   title: "Error",
                   text:
@@ -473,7 +402,7 @@ class NewMember extends Component {
                 });
               }
             } catch (error) {
-              this.setState({ loading: false });
+              this.setState({ loading: false, errorMessage: '' });
               swal({
                 title: "Error",
                 text: error.message,
@@ -490,6 +419,9 @@ class NewMember extends Component {
   };
 
   render() {
+    if (this.state.returnMainPage){
+      return <Redirect to="/" />
+    }
     return (
       <div className={styles.NewMember}>
         <NavLink to="/">Volver</NavLink>
@@ -654,7 +586,7 @@ class NewMember extends Component {
           </Form.Group>
           <div className={styles.newMemberOccupationSelectedList}>
             <MemberOccupations
-              occupations={this.state.occupations}
+              occupations={this.state.selectedOccupations}
               clicked={this.deleteMemberOccupationHandler}
             />
           </div>

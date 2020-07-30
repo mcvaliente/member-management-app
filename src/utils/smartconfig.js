@@ -62,20 +62,30 @@ export const offices = [
 ];
 
 //Categories
-export const categories = [
+export const occupationCategories = [
     {id: "cat01", name: "Artes escénicas" },
-    {id: "cat02", name: "Audiovisual" }
+    {id: "cat02", name: "Audiovisual" },
+    {id: "cat03", name: "Otros" }
 ];
 
-//Occupations
+//Occupations (max 32 characters in order to be stored correctly in the blockchain as bytes32).
+//Solidity does not allow arrays of strings as a parameter in a function in the current version.
 export const occupations= [
-    {id: "occ01001", name: "Actriz /Actor", category: "Artes escénicas" },
-    {id: "occ01002", name: "Bailarín/a", category: "Artes escénicas" },
-    {id: "occ01003", name: "Coreógrafo/a", category: "Artes escénicas" },
-    {id: "occ01004", name: "Productor/a", category: "Artes escénicas" },
-    {id: "occ02001", name: "Fotógrafo/a", category: "Audiovisual" },
-    {id: "occ02002", name: "Técnico/a de sonido", category: "Audiovisual" },
-    {id: "occ02003", name: "Maquinista", category: "Audiovisual" }
+    {id: "occ01001", name: "Actor/Actriz", category: "Artes escénicas" },
+    {id: "occ01002", name: "Artes plásticas", category: "Artes escénicas" },
+    {id: "occ01003", name: "Bailarín/a", category: "Artes escénicas" },
+    {id: "occ01004", name: "Coreógrafo/a", category: "Artes escénicas" },
+    {id: "occ01005", name: "Músico/a", category: "Artes escénicas" },
+    {id: "occ01006", name: "Productor/a", category: "Artes escénicas" },
+    {id: "occ01007", name: "Otros", category: "Artes escénicas" },
+    {id: "occ02001", name: "Animación 2D/3D", category: "Audiovisual" },
+    {id: "occ02002", name: "Diseño gráfico", category: "Audiovisual" },
+    {id: "occ02003", name: "Fotógrafo/a", category: "Audiovisual" },
+    {id: "occ02004", name: "Maquinista", category: "Audiovisual" },
+    {id: "occ02005", name: "Realización de vídeo", category: "Audiovisual" },
+    {id: "occ02006", name: "Técnico/a de sonido", category: "Audiovisual" },
+    {id: "occ02007", name: "Otros", category: "Audiovisual" },
+    {id: "occ03001", name: "Otros", category: "Otros" }
 ];
 
 

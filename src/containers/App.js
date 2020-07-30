@@ -12,9 +12,13 @@ import {
 import { Switch, Route, Redirect } from "react-router-dom";
 import NewMember from "../containers/member/NewMember";
 import Home from "../components/home/Home";
+//import MemberInfo from '../components/members/member/MemberInfo';
 import NotFound from "../components/error/NotFound";
+import MemberInfo from "./member/MemberInfo";
 
 class App extends Component {
+  _isMounted = false;
+
   state = {
     isMetaMaskInstalled: false,
     isRinkebyNetwork: false,
@@ -24,6 +28,7 @@ class App extends Component {
   };
 
   async componentDidMount() {
+    this._isMounted = true;
     //Check if MetaMask is installed.
     const isMetaMaskInstalled = checkMetaMask();
     //If MetaMask is not installed we have to show the corresponding section
@@ -36,6 +41,10 @@ class App extends Component {
       const isRinkebyNetwork = await checkRinkebyNetwork();
       this.setState({ isRinkebyNetwork });
     }
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
   }
 
   metaMaskConnectionHandler = async () => {
@@ -100,10 +109,22 @@ class App extends Component {
               <NewMember metaMaskConnected={this.state.isMetaMaskConnected} />
             )}
           ></Route>
-          {/* Redirect user to Page 404 if route does not exist. */}
+          <Route
+            exact
+            path="/member/:id"
+            component={() => (
+              <MemberInfo
+                metaMaskConnected={this.state.isMetaMaskConnected}
+              />
+            )}
+          />
+          {/* Redirect user to a specific page if the route does not exist. */}
           <Route component={NotFound} />
         </Switch>
-        {!this.state.isMetaMaskInstalled ? <Redirect to="/" /> : null}
+        {/*Redirect to the main page if the MetaMask connection button is disabled */}
+        {!this.state.isMetaMaskInstalled || !this.state.isRinkebyNetwork ? (
+          <Redirect to="/" />
+        ) : null}
         {this.state.loading ? <Loader></Loader> : null}
       </Layout>
     );
