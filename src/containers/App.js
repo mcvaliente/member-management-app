@@ -4,11 +4,7 @@ import "semantic-ui-css/semantic.min.css";
 import { Message } from "semantic-ui-react";
 import { Loader } from "../utils/smartloader";
 import Layout from "../components/layout/Layout";
-import {
-  checkMetaMask,
-  checkRinkebyNetwork,
-  enableMetaMask,
-} from "../contracts/web3";
+import { checkMetaMask, checkRinkebyNetwork, enableMetaMask } from "../contracts/web3";
 import { Switch, Route, Redirect } from "react-router-dom";
 import NewMember from "../containers/member/NewMember";
 import Home from "../components/home/Home";
@@ -39,9 +35,21 @@ class App extends Component {
     //using the Rinkeby Test Network.
     if (isMetaMaskInstalled) {
       const isRinkebyNetwork = await checkRinkebyNetwork();
+      if (isRinkebyNetwork) {
+        console.log("MetaMask is connected to the Rinkeby test network.");
+      } else {
+        console.log("ERROR - MetaMask is noy connected to the Rinkeby test network. Please, select this network.");
+      }
       this.setState({ isRinkebyNetwork });
+      //Listen if the network id changes. Reload the page for security.
+      //See "chainChainged" section in https://docs.metamask.io/guide/ethereum-provider.html#events
+      window.ethereum.on('chainChanged', (_chainId) => window.location.reload());
+    } else {
+      this.setState( { isMetaMaskInstalled : false })
+      console.log("MetaMask is not installed in this browser.");
     }
-  }
+
+   }
 
   componentWillUnmount() {
     this._isMounted = false;
@@ -54,10 +62,10 @@ class App extends Component {
     try {
       const success = await enableMetaMask();
       if (success) {
-        console.log("Conectado a MetaMask");
+        console.log("The applications is connected to MetaMask.");
         this.setState({ isMetaMaskConnected: true });
       } else {
-        console.log("No conectado a MetaMask");
+        console.log("Failure when connecting to Metamask.");
         this.setState({
           isMetaMaskConnected: false,
           errorMessage: "No se ha podido conectar con MetaMask.",
@@ -74,9 +82,7 @@ class App extends Component {
   render() {
     return (
       <Layout
-        disabled={
-          !this.state.isMetaMaskInstalled || !this.state.isRinkebyNetwork
-        }
+        disabled={!this.state.isMetaMaskInstalled || !this.state.isRinkebyNetwork}
         connected={this.state.isMetaMaskConnected}
         clicked={this.metaMaskConnectionHandler}
       >

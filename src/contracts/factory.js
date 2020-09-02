@@ -10,7 +10,7 @@ const web3 = getWeb3();
 if (web3) {
   instance = new web3.eth.Contract(
     MemberFactory.abi,
-    "0xD4C33aC47825d443c60F46b4E3aa8129Fc9f5728"
+    "0x267856E9f833a2E8b8D17803F165b930Ae7c88c2"
   );
 }
 

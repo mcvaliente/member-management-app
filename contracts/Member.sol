@@ -7,14 +7,12 @@ contract MemberFactory {
 
     function createMember(
         bytes32 memberId,
+        bytes32[] memory memberDates,
         string memory name,
         string memory surname,
-        bytes32 birthdate,
-        string memory office,
-        string memory county,
-        string memory country,
-        bytes32[] memory occupations,
-        bytes32 acceptanceDate
+        string memory email,
+        bytes32[] memory location,
+        bytes32[] memory occupations
     ) public {
         //Create the contract instance.
         Member newMember = new Member();
@@ -23,14 +21,12 @@ contract MemberFactory {
         //Add the member information.
         newMember.addMemberInformation(
             memberId,
+            memberDates,
             name,
             surname,
-            birthdate,
-            office,
-            county,
-            country,
-            occupations,
-            acceptanceDate
+            email,
+            location,
+            occupations
         );
     }
 
@@ -61,37 +57,36 @@ contract Member {
         bytes32 birthdate; //dd/mm/aaaa
         string name;
         string surname;
+        string email;
     }
 
     struct LocationInfo {
-        string office;
-        string county;
-        string country;
+        bytes32 office;
+        bytes32 county;
+        bytes32 country;
     }
 
     MemberInfo memberInfo;
 
     function addMemberInformation(
         bytes32 memberId,
+        bytes32[] memory memberDates,
         string memory name,
         string memory surname,
-        bytes32 birthdate,
-        string memory office,
-        string memory county,
-        string memory country,
-        bytes32[] memory occupations,
-        bytes32 acceptanceDate
+        string memory email,
+        bytes32[] memory location,
+        bytes32[] memory occupations
     ) public {
         PersonalInfo memory personalData = PersonalInfo({
-            memberId: memberId, birthdate: birthdate, name: name, surname: surname
+            memberId: memberId, birthdate: memberDates[0], name: name, surname: surname, email: email
         });
 
         LocationInfo memory locationData = LocationInfo({
-            office: office, county: county, country: country
+            office: location[0], county: location[1], country: location[2]
         });
 
         MemberInfo memory newMember = MemberInfo({
-            personalData: personalData, memberLocation: locationData, occupations : occupations, acceptanceDate: acceptanceDate, isActive: true
+            personalData: personalData, memberLocation: locationData, occupations : occupations, acceptanceDate: memberDates[1], isActive: true
         });
 
         memberInfo = newMember;
@@ -108,8 +103,9 @@ contract Member {
             string memory,
             string memory,
             string memory,
-            string memory,
-            string memory,
+            bytes32,
+            bytes32,
+            bytes32,
             bool
         )
     {
@@ -119,6 +115,7 @@ contract Member {
             memberInfo.acceptanceDate,
             memberInfo.personalData.name,
             memberInfo.personalData.surname,
+            memberInfo.personalData.email,
             memberInfo.memberLocation.office,
             memberInfo.memberLocation.county,
             memberInfo.memberLocation.country,
@@ -130,4 +127,5 @@ contract Member {
     {
         return memberInfo.occupations;
     }
+
 }

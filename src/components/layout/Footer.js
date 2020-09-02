@@ -25,7 +25,7 @@ export default () => {
                     target="_blank"
                     rel="noopener noreferrer">
                  GitHub
-            </a>
+                </a>
             </div>
 
         </div>

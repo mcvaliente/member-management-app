@@ -24,6 +24,11 @@ beforeEach(async () => {
   memberId = await web3.utils.fromAscii("70006672P");
   birthdate = await web3.utils.fromAscii("11/03/1991");
   acceptanceDate = await web3.utils.fromAscii("17/07/2020");
+  memberDates = [birthdate, acceptanceDate];
+  office = await web3.utils.fromAscii("Barcelona");
+  county = await web3.utils.fromAscii("Álava");
+  country = await web3.utils.fromAscii("España");
+  location = [office, county, country]
   occupation1 = await web3.utils.fromAscii("Actor/Actriz");
   occupation2 = await web3.utils.fromAscii("Bailarín/a");
   occupations = [occupation1, occupation2];
@@ -40,14 +45,12 @@ beforeEach(async () => {
     await factory.methods
       .createMember(
         memberId,
+        memberDates,
         "Sofía",
         "Fernández Alonso",
-        birthdate,
-        "Barcelona",
-        "Álava",
-        "España",
-        occupations,
-        acceptanceDate
+        "sofiaf@ccc.es",
+        location,
+        occupations
       )
       .send({
         from: accounts[0],

@@ -6,6 +6,7 @@
 
 .memberInfoSpan {
     margin-top: 20px;
+    margin-right: 480px;
 }
 
 .memberInfoButtonSection {
@@ -39,3 +40,4 @@
 .memberInfoOccupationSelectedList {
     margin: 20px auto;
 }
+

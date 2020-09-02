@@ -4,7 +4,8 @@ import { Divider } from 'semantic-ui-react';
 import styles from '../../assets/css/Members.module.css';
 import MemberSearch from "./member/MemberSearch";
 
-const Members = ( props ) => {
+//Using Hooks.
+function Members (props) {
     return (
         <div className={styles.Members}>
             <span className={styles.span}>¿Quieres añadir a una nueva persona?</span>

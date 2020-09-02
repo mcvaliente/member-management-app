@@ -7,6 +7,7 @@ import MetaMaskInfo from '../ethereum/MetaMaskInfo';
 const srcMetaMaskDownloadImg = '/images/download-metamask-button.png';
 const srcInfoIcon = '/images/info-icon.svg';
 
+//Using Hooks.
 const MetaMask = () => {
     return (
         <div className={styles.MetaMask}>

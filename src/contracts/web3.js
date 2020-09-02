@@ -3,7 +3,7 @@ import Web3 from "web3";
 let web3;
 
 export function checkMetaMask() {
-  if (window.ethereum && window.ethereum.isMetaMask) {
+  if ((typeof window.ethereum !== 'undefined') && (window.ethereum.isMetaMask)) {
     return true;
   } else {
     return false;
@@ -28,10 +28,8 @@ export async function checkRinkebyNetwork() {
       const networkId = await web3.eth.net.getId();
       const isRinkeby = networkId === 4;
       if (isRinkeby) {
-        console.log("OK - Rinkeby network selected.");
         return true;
       } else {
-        console.log("ERROR - Please, select Rinkeby network.");
         return false;
       }
     }
@@ -45,7 +43,7 @@ export function getWeb3() {
   //We obtain an instance of the web3:
   if (!web3) {
     web3 = new Web3(Web3.givenProvider);
-    if (window.ethereum) {
+    if (typeof window.ethereum !== "undefined") {
       //In  order to silence a console warning when page inspection.
       window.ethereum.autoRefreshOnNetworkChange = false;
     }

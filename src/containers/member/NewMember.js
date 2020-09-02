@@ -320,22 +320,26 @@ class NewMember extends Component {
                       const bytes32AcceptanceDate = web3.utils.fromAscii(
                         this.state.acceptanceDate
                       );
-                      let bytes32Occupations = this.state.selectedOccupations.map(
+                      const bytes32MemberDates = [bytes32Birthdate, bytes32AcceptanceDate];
+                      const bytes32Occupations = this.state.selectedOccupations.map(
                         (occupation) => {
                           return web3.utils.fromAscii(occupation);
                         }
                       );
+                      const bytes32MemberOffice = web3.utils.fromAscii(this.state.office);
+                      const bytes32MemberCounty = web3.utils.fromAscii(this.state.county);
+                      const bytes32MemberCountry = web3.utils.fromAscii(this.state.country);
+                      const bytes32MemberLocation = [bytes32MemberOffice, bytes32MemberCounty, bytes32MemberCountry];
+
                       await factory.methods
                         .createMember(
                           bytes32MemberId,
+                          bytes32MemberDates,
                           this.state.name,
                           this.state.surname,
-                          bytes32Birthdate,
-                          this.state.office,
-                          this.state.county,
-                          this.state.country,
-                          bytes32Occupations,
-                          bytes32AcceptanceDate
+                          this.state.email,
+                          bytes32MemberLocation,
+                          bytes32Occupations
                         )
                         .send({
                           from: currentAccount,
@@ -588,6 +592,7 @@ class NewMember extends Component {
             <MemberOccupations
               occupations={this.state.selectedOccupations}
               clicked={this.deleteMemberOccupationHandler}
+              canDelete={true}
             />
           </div>
           <Form.Field>
