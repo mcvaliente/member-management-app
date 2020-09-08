@@ -8,7 +8,6 @@ import { checkMetaMask, checkRinkebyNetwork, enableMetaMask } from "../contracts
 import { Switch, Route, Redirect } from "react-router-dom";
 import NewMember from "../containers/member/NewMember";
 import Home from "../components/home/Home";
-//import MemberInfo from '../components/members/member/MemberInfo';
 import NotFound from "../components/error/NotFound";
 import MemberInfo from "./member/MemberInfo";
 

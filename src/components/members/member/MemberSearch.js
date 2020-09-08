@@ -5,8 +5,8 @@ import styles from '../../../assets/css/Members.module.css';
 const MemberSearch = ( props ) => {   
     return (
         <div>
-            <span className={styles.span}>¿Buscas un socio/a?</span>
-            <MemberSearchBar metaMaskConnected = {props.metaMaskConnected} />
+           <span className={styles.span}>¿Buscas un socio/a?</span>
+           <MemberSearchBar metaMaskConnected = {props.metaMaskConnected}/>
         </div>
     );
 };

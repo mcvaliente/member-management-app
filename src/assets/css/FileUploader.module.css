@@ -1,0 +1,23 @@
+.fileUploaderButton {
+    background-color: #ffffff !important;
+    border: 2px solid #919192 !important;
+    border-radius: 4px;
+    vertical-align: middle;
+    width: 120px;
+    height: 40px;
+    padding: 0;
+    box-shadow: none;
+    cursor: pointer;
+    color: #56595A;
+}
+
+.fileUploaderButton:disabled {
+    background-color: #DDDDDD !important;
+    border: 2px solid #DDDDDD !important;
+    border-radius: 4px;
+    vertical-align: middle;
+    width: 120px;
+    height: 40px;
+    padding: 0;
+}
+

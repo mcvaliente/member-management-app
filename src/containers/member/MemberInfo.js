@@ -14,8 +14,10 @@ import factory from "../../contracts/factory";
 import Member from "../../contracts/member";
 import MemberOccupations from "../../components/members/member/MemberOccupations";
 import { Loader } from "../../utils/smartloader";
+import MemberInfoSearch from '../../components/members/member/MemberInfoSearch';
 
-//Using Hooks.
+
+//Using Hooks. 
 const MemberInfo = (props) => {
   const { id } = useParams();
 
@@ -41,6 +43,7 @@ const MemberInfo = (props) => {
   const [returnMainPage, setReturnMainPage] = useState(false);
   const [editMode, setEditMode] = useState(false);
 
+  //useEffect executes only when the memberID state changes.
   useEffect(() => {
     async function GetMemberInfo() {
       try {
@@ -173,16 +176,7 @@ const MemberInfo = (props) => {
     setOccupationCategoryList(occupations);
     //We must to include [] in order to execute this only on Mount.
     //We add "memberID" since if it is changes it should be executed:
-  }, [memberID]);
-
-  const onSubmit = (e, data) => {
-    e.preventDefault();
-    setLoading(true);
-    console.log("onSubmit data: ", data);
-    setLoading(false);
-    setErrorMessage("");
-    swal("Pendiente de implementar");
-  };
+  },[memberID]);
 
   const onClick = () => {
     setEditMode(true);
@@ -234,15 +228,32 @@ const MemberInfo = (props) => {
     setActiveMember(value);
   };
 
+  const memberSearchHandler = (memberId) => {
+    console.log("New member id to search: ", memberId);
+    setMemberID(memberId);
+  }
+
+  const onSubmit = (e, data) => {
+    e.preventDefault();
+    setLoading(true);
+    console.log("onSubmit data: ", data);
+    setLoading(false);
+    setErrorMessage("");
+    swal("Pendiente de implementar");
+  };
+
   if (returnMainPage) {
     return <Redirect to="/" />;
   }
   return (
     <div className={styles.MemberInfo}>
-      <NavLink to="/">Volver</NavLink>
+      <div style={{ marginBottom:"30px"}}>
+        <NavLink to="/">Volver</NavLink>
+      </div>
+      <MemberInfoSearch metaMaskConnected = {props.metaMaskConnected} memberIdHandler = {memberSearchHandler} />
       <Divider style={{ width: 900 }} />
       <span className={styles.memberInfoSpan}>
-        Hemos encontrado un resultado con NIF/NIE: <strong>{id}</strong>
+        Hemos encontrado un resultado con NIF/NIE: <strong>{memberID}</strong>
       </span>
       {props.metaMaskConnected ? (
         <button className={styles.memberInfoButton} onClick={onClick}>
@@ -276,6 +287,20 @@ const MemberInfo = (props) => {
             <label>Activo</label>
           </div>
         </Form.Field>
+        <Form.Field>
+          <label>NIF / NIE</label>
+          {/*The NIF/NIE cannot be updated. Always disabled.*/}
+          <input
+            placeholder="NIF / NIE"
+            value={memberID}
+            onChange={(event) => setMemberID(event.target.value)}
+            style={{ width: 300, background:'#E3E6E7' }}
+            onKeyPress={(e) => {
+              e.key === "Enter" && e.preventDefault();
+            }}
+            disabled
+          />
+        </Form.Field>
         <Form.Group widths="equal">
           <Form.Field>
             <label>Nombre</label>
@@ -304,19 +329,6 @@ const MemberInfo = (props) => {
             />
           </Form.Field>
         </Form.Group>
-        <Form.Field>
-          <label>NIF / NIE</label>
-          <input
-            placeholder="NIF / NIE"
-            value={memberID}
-            onChange={(event) => setMemberID(event.target.value)}
-            style={{ width: 300 }}
-            onKeyPress={(e) => {
-              e.key === "Enter" && e.preventDefault();
-            }}
-            disabled={!editMode}
-          />
-        </Form.Field>
         <Form.Group widths="equal">
           <Form.Field>
             <label>Fecha de nacimiento</label>
