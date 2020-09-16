@@ -6,7 +6,7 @@ const MemberSearch = ( props ) => {
     return (
         <div>
            <span className={styles.span}>¿Buscas un socio/a?</span>
-           <MemberSearchBar metaMaskConnected = {props.metaMaskConnected}/>
+           <MemberSearchBar metaMaskConnected = {props.metaMaskConnected} memberIdHandler={props.memberIdHandler}/>
         </div>
     );
 };

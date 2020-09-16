@@ -14,7 +14,7 @@ import factory from "../../contracts/factory";
 import Member from "../../contracts/member";
 import MemberOccupations from "../../components/members/member/MemberOccupations";
 import { Loader } from "../../utils/smartloader";
-import MemberInfoSearch from '../../components/members/member/MemberInfoSearch';
+import MemberSearch from '../../components/members/member/MemberSearch';
 
 
 //Using Hooks. 
@@ -250,7 +250,7 @@ const MemberInfo = (props) => {
       <div style={{ marginBottom:"30px"}}>
         <NavLink to="/">Volver</NavLink>
       </div>
-      <MemberInfoSearch metaMaskConnected = {props.metaMaskConnected} memberIdHandler = {memberSearchHandler} />
+      <MemberSearch metaMaskConnected = {props.metaMaskConnected} memberIdHandler = {memberSearchHandler} />
       <Divider style={{ width: 900 }} />
       <span className={styles.memberInfoSpan}>
         Hemos encontrado un resultado con NIF/NIE: <strong>{memberID}</strong>

@@ -1,27 +1,26 @@
-import React, { Component } from "react";
+import React, { useState } from "react";
 import { getWeb3, checkRinkebyNetwork } from "../../contracts/web3";
 import factory from "../../contracts/factory";
 import swal from "sweetalert";
-import { Redirect } from "react-router-dom";
 
-class MemberSearchBar extends Component {
+const MemberSearchBar = (props) => {
 
-  state = {
-    memberId: '',
-    loading: false
+  const [loading, setLoading] = useState(false);
+
+  const memberHandler = (memberId) => {
+    props.memberIdHandler(memberId);
   };
 
-  keyPressHandler = (e) => {
+  const keyPressHandler = (e) => {
     if (e.key === "Enter") {
-      console.log("Member to search: " + e.target.value);
       //Check if we have this member Id in the blockchain.
-      this.memberSearchHandler(e.target.value);
+      memberSearchHandler(e.target.value);
     }
   };
 
-  memberSearchHandler = async (memberId) => {
+  const memberSearchHandler = async (memberId) => {
     try {
-      this.setState({ loading: true });
+      setLoading(true);
       console.log("Member to check: " + memberId);
       const web3 = getWeb3();
       //We have to check if web3 has a value.
@@ -29,7 +28,7 @@ class MemberSearchBar extends Component {
         //Check account.
         const accounts = await web3.eth.getAccounts();
         if (accounts.length === 0) {
-          this.setState({ loading : false });
+          setLoading(false);
           swal({
             title: "Error",
             text:
@@ -47,14 +46,13 @@ class MemberSearchBar extends Component {
               .getMemberAddress(bytes32MemberId)
               .call();
             console.log("Contract address for this member ID: ", memberAddress);
-            this.setState({ loading : false })
+            setLoading(false);
             if (
               memberAddress !== "0x0000000000000000000000000000000000000000"
             ) {
               //The member ID has been found in the blockchain.
-              //We assign the value to this.state.memberId in order to redirect
-              //to the member page.
-              this.setState({ memberId });
+              //We assign the props.
+              memberHandler(memberId);
             } else {
               swal({
                 title: "Error",
@@ -67,7 +65,7 @@ class MemberSearchBar extends Component {
               });
             }
           } else {
-            this.setState({ loading: false });
+            setLoading(false);
             swal({
               title: "Error",
               text:
@@ -78,7 +76,7 @@ class MemberSearchBar extends Component {
           }
         }
       } else {
-        this.setState({ loading: false });
+        setLoading(false);
         swal({
           title: "Error",
           text:
@@ -88,7 +86,7 @@ class MemberSearchBar extends Component {
         });
       }
     } catch (error) {
-      this.setState({ loading: false });
+      setLoading(false);
       swal({
         title: "Error",
         text: error.message,
@@ -98,28 +96,21 @@ class MemberSearchBar extends Component {
     }
   };
 
-  render() {
-    if (this.state.memberId){
-      return <Redirect to={`/member/${this.state.memberId}`}></Redirect>
-    }
 
-    return (
-      <div
-        className={
-          this.state.loading ? "ui loading icon input" : "ui icon input"
-        }
-        style={{ marginLeft: "20px" }}
-      >
-        <input
-          type="text"
-          placeholder="Busca por NIF/NIE..."
-          disabled={!this.props.metaMaskConnected}
-          onKeyPress={this.keyPressHandler}
-        />
-        <i aria-hidden="true" className="search icon"></i>
-      </div>
-    );
-  }
+  return (
+    <div
+      className={loading ? "ui loading icon input" : "ui icon input"}
+      style={{ marginLeft: "20px" }}
+    >
+      <input
+        type="text"
+        placeholder="Busca por NIF/NIE..."
+        disabled={!props.metaMaskConnected}
+        onKeyPress={keyPressHandler}
+      />
+      <i aria-hidden="true" className="search icon"></i>
+    </div>
+  );
 }
 
 export default MemberSearchBar;

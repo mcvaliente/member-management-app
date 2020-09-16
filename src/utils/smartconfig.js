@@ -64,8 +64,15 @@ export const offices = [
 //Categories
 export const occupationCategories = [
     {id: "cat01", name: "Artes escénicas" },
-    {id: "cat02", name: "Audiovisual" },
-    {id: "cat03", name: "Otras" }
+    {id: "cat02", name: "Artes plásticas" },
+    {id: "cat03", name: "Artesanía, costura y manufactura" },
+    {id: "cat04", name: "Audiovisuales y media" },
+    {id: "cat05", name: "Diseño y arquitectura" },
+    {id: "cat06", name: "Educación, formación y servicios personales" },
+    {id: "cat07", name: "Fotografía" },
+    {id: "cat08", name: "Managing, gestión, dirección, producción" },
+    {id: "cat09", name: "Traducción, escritura y comunicación" },
+    {id: "cat10", name: "Otros" }
 ];
 
 //Occupations (max 32 characters in order to be stored correctly in the blockchain as bytes32).
@@ -78,15 +85,15 @@ export const occupations= [
     {id: "occ01004", name: "Coreógrafo/a", category: "Artes escénicas" },
     {id: "occ01005", name: "Músico/a", category: "Artes escénicas" },
     {id: "occ01006", name: "Productor/a", category: "Artes escénicas" },
-    {id: "occ01007", name: "Otras", category: "Artes escénicas" },
-    {id: "occ02001", name: "Animación 2D/3D", category: "Audiovisual" },
-    {id: "occ02002", name: "Diseño gráfico", category: "Audiovisual" },
-    {id: "occ02003", name: "Fotógrafo/a", category: "Audiovisual" },
-    {id: "occ02004", name: "Maquinista", category: "Audiovisual" },
-    {id: "occ02005", name: "Realización de vídeo", category: "Audiovisual" },
-    {id: "occ02006", name: "Técnico/a de sonido", category: "Audiovisual" },
-    {id: "occ02007", name: "Otras", category: "Audiovisual" },
-    {id: "occ03001", name: "Otras", category: "Otras" }
+    {id: "occ01007", name: "Otros", category: "Artes escénicas" },
+    {id: "occ04001", name: "Animación 2D/3D", category: "Audiovisuales y media" },
+    {id: "occ04002", name: "Diseño gráfico", category: "Audiovisuales y media" },
+    {id: "occ04003", name: "Fotógrafo/a", category: "Audiovisuales y media" },
+    {id: "occ04004", name: "Maquinista", category: "Audiovisuales y media" },
+    {id: "occ04005", name: "Realización de vídeo", category: "Audiovisuales y media" },
+    {id: "occ04006", name: "Técnico/a de sonido", category: "Audiovisuales y media" },
+    {id: "occ04007", name: "Otros", category: "Audiovisuales y media" },
+    {id: "occ10001", name: "Otros", category: "Otros" }
 ];
 
 
