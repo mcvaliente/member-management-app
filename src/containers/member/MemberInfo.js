@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { NavLink, Redirect, useParams } from "react-router-dom";
+import { NavLink, useParams } from "react-router-dom";
 import { Divider, Form, Input, Message, Icon } from "semantic-ui-react";
 import styles from "../../assets/css/MemberInfo.module.css";
 import {
@@ -7,20 +7,20 @@ import {
   offices,
   occupationCategories,
   occupations,
-} from "../../utils/smartconfig";
+} from "../../utils/dappconfig";
 import { getWeb3, checkRinkebyNetwork } from "../../contracts/web3";
 import swal from "sweetalert";
-import factory from "../../contracts/factory";
 import Member from "../../contracts/member";
 import MemberOccupations from "../../components/members/member/MemberOccupations";
-import { Loader } from "../../utils/smartloader";
+import { Loader } from "../../utils/loader";
 import MemberSearch from '../../components/members/member/MemberSearch';
 
 
 //Using Hooks. 
 const MemberInfo = (props) => {
-  const { id } = useParams();
+  const { id, address } = useParams();
 
+  const [contractAddress, setContractAddress] = useState(address);
   const [name, setName] = useState("");
   const [surname, setSurname] = useState("");
   const [memberID, setMemberID] = useState(id);
@@ -40,13 +40,14 @@ const MemberInfo = (props) => {
   const [categoryList, setCategoryList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [returnMainPage, setReturnMainPage] = useState(false);
   const [editMode, setEditMode] = useState(false);
 
   //useEffect executes only when the memberID state changes.
   useEffect(() => {
     async function GetMemberInfo() {
       try {
+        console.log("Parameter id: ", memberID);
+        console.log("Parameter address: ", contractAddress);
         const web3 = getWeb3();
         //We have to check if web3 has a value.
         if (web3) {
@@ -64,31 +65,8 @@ const MemberInfo = (props) => {
           } else {
             const isRinkeby = checkRinkebyNetwork();
             if (isRinkeby) {
-              //Get the current account.
-              const bytes32MemberId = web3.utils.fromAscii(memberID);
-              //Get the contract address for this member.
-              const memberContractAddress = await factory.methods
-                .getMemberAddress(bytes32MemberId)
-                .call();
-              console.log(
-                "Contract address for this member ID: ",
-                memberContractAddress
-              );
-              if (
-                memberContractAddress ===
-                "0x0000000000000000000000000000000000000000"
-              ) {
-                swal({
-                  title: "Error",
-                  text:
-                    "No se ha podido recuperar la localización de la persona socia.",
-                  icon: "error",
-                  button: "Aceptar",
-                });
-                setReturnMainPage(true);
-              } else {
                 //Get the member info stored in the blockchain.
-                const member = Member(memberContractAddress);
+                const member = Member(contractAddress);
                 const memberInfo = await member.methods
                   .getMemberSummary()
                   .call();
@@ -99,7 +77,6 @@ const MemberInfo = (props) => {
                   .getMemberOccupations()
                   .call();
                 ReadMemberOccupations(web3, memberOccupations);
-              }
             } else {
               swal({
                 title: "Error",
@@ -168,15 +145,15 @@ const MemberInfo = (props) => {
     setOfficeList(offices);
 
     //Categories
-    setCurrentCategory("categorySelection");
+    setCurrentCategory("cat00");
     setCategoryList(occupationCategories);
 
     //Occupations
-    setCurrentOccupation("occupationSelection");
+    setCurrentOccupation("occ00000");
     setOccupationCategoryList(occupations);
     //We must to include [] in order to execute this only on Mount.
     //We add "memberID" since if it is changes it should be executed:
-  },[memberID]);
+  },[memberID, contractAddress]);
 
   const onClick = () => {
     setEditMode(true);
@@ -199,19 +176,25 @@ const MemberInfo = (props) => {
   const categorySelectHandler = (e) => {
     //console.log ("Selected category: " + e.target.value);
 
-    if (e.target.value !== "categorySelection") {
+    if (e.target.value !== "cat00") {
       setCurrentCategory(e.target.value);
     }
   };
 
   const occupationSelectHandler = (e) => {
     //console.log("Selected occupation: " + e.target.value);
-    if (e.target.value !== "occupationSelection") {
+    let newOccupation = e.target.value;
+    if (newOccupation !== "occ00000") {
       const occupationsList = [...selectedOccupations];
-      setCurrentOccupation(e.target.value);
+      //Check that the occupation length is <= 32.
+      if (newOccupation.length > 32){
+        //Get 32 characters.
+        newOccupation = newOccupation.substring(0, 31);
+      }
+      setCurrentOccupation("occ00000");
       //Check if the occupation is in the list yet.
-      if (!occupationsList.includes(e.target.value)) {
-        occupationsList.push(e.target.value);
+      if (!occupationsList.includes(newOccupation)) {
+        occupationsList.push(newOccupation);
         setSelectedOccupations(occupationsList);
       }
     }
@@ -228,9 +211,11 @@ const MemberInfo = (props) => {
     setActiveMember(value);
   };
 
-  const memberSearchHandler = (memberId) => {
+  const memberSearchHandler = (memberId, memberAddress) => {
     console.log("New member id to search: ", memberId);
+    console.log("New member contract address: ", memberAddress);
     setMemberID(memberId);
+    setContractAddress(memberAddress);
   }
 
   const onSubmit = (e, data) => {
@@ -242,9 +227,6 @@ const MemberInfo = (props) => {
     swal("Pendiente de implementar");
   };
 
-  if (returnMainPage) {
-    return <Redirect to="/" />;
-  }
   return (
     <div className={styles.MemberInfo}>
       <div style={{ marginBottom:"30px"}}>
@@ -415,11 +397,11 @@ const MemberInfo = (props) => {
                 onChange={categorySelectHandler}
                 style={{ width: 300 }}
               >
-                <option key="selectCategory" value="categorySelection">
+                <option key="selectCategory" value="cat00">
                   Selecciona una categoría...
                 </option>
                 {categoryList.map((item) => (
-                  <option key={item.id}>{item.name}</option>
+                  <option key={item.id} value={item.id}>{item.name}</option>
                 ))}
               </select>
             </Form.Field>
@@ -429,9 +411,9 @@ const MemberInfo = (props) => {
                 value={currentOccupation}
                 onChange={occupationSelectHandler}
                 style={{ width: 300 }}
-                disabled={currentCategory === "categorySelection"}
+                disabled={currentCategory === "cat00"}
               >
-                <option id="selectOccupation" value="occupationSelection">
+                <option id="selectOccupation" value="occ00000">
                   Selecciona una profesión...
                 </option>
                 {occupationCategoryList.map((item) =>

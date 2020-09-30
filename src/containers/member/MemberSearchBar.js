@@ -7,8 +7,8 @@ const MemberSearchBar = (props) => {
 
   const [loading, setLoading] = useState(false);
 
-  const memberHandler = (memberId) => {
-    props.memberIdHandler(memberId);
+  const memberHandler = (memberId, memberAddress) => {
+    props.memberIdHandler(memberId, memberAddress);
   };
 
   const keyPressHandler = (e) => {
@@ -52,7 +52,7 @@ const MemberSearchBar = (props) => {
             ) {
               //The member ID has been found in the blockchain.
               //We assign the props.
-              memberHandler(memberId);
+              memberHandler(memberId, memberAddress);
             } else {
               swal({
                 title: "Error",

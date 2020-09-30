@@ -7,7 +7,7 @@ import {
   offices,
   occupationCategories,
   occupations,
-} from "../../utils/smartconfig";
+} from "../../utils/dappconfig";
 import {
   checkEmail,
   checkTextField,
@@ -23,7 +23,7 @@ import {
 } from "../../contracts/web3";
 import swal from "sweetalert";
 import factory from "../../contracts/factory";
-import { Loader } from "../../utils/smartloader";
+import { Loader } from "../../utils/loader";
 import FileUploader from "../../utils/FileUploader";
 import MemberOccupations from "../../components/members/member/MemberOccupations";
 
@@ -67,11 +67,11 @@ class NewMember extends Component {
     this.setState({ officeList: offices });
 
     //Categories
-    this.setState({ currentCategory: "categorySelection" });
+    this.setState({ currentCategory: "cat00" });
     this.setState({ categoryList: occupationCategories });
 
     //Occupations
-    this.setState({ currentOccupation: "occupationSelection" });
+    this.setState({ currentOccupation: "occ00000" });
     this.setState({ occupationCategoryList: occupations });
   }
 
@@ -94,19 +94,25 @@ class NewMember extends Component {
   categorySelectHandler = (e) => {
     //console.log ("Selected category: " + e.target.value);
 
-    if (e.target.value !== "categorySelection") {
+    if (e.target.value !== "cat00") {
       this.setState({ currentCategory: e.target.value });
     }
   };
 
   occupationSelectHandler = (e) => {
     //console.log("Selected occupation: " + e.target.value);
-    if (e.target.value !== "occupationSelection") {
+    let newOccupation = e.target.value;    
+    if (e.target.value !== "occ00000") {
       const occupationsList = [...this.state.selectedOccupations];
-      this.setState({ currentOccupation: e.target.value });
+      //Check that the occupation length is <= 32.
+      if (newOccupation.length > 32){
+        //Get 32 characters.
+        newOccupation = newOccupation.substring(0, 31);
+      }
+      this.setState({ currentOccupation: "occ00000" });
       //Check if the occupation is in the list yet.
-      if (!occupationsList.includes(e.target.value)) {
-        occupationsList.push(e.target.value);
+      if (!occupationsList.includes(newOccupation)) {
+        occupationsList.push(newOccupation);
         this.setState({ selectedOccupations: occupationsList });
       }
     }
@@ -119,7 +125,7 @@ class NewMember extends Component {
   };
 
   applicationFileSelectionHandler = (fileUploaded) => {
-    console.log("Uploaded application file object", fileUploaded);
+    console.log("Uploaded application file object: ", fileUploaded);
     let reader = new FileReader();
     reader.readAsDataURL(fileUploaded);
     this.setState({
@@ -380,6 +386,8 @@ class NewMember extends Component {
                         bytes32Birthdate,
                         bytes32AcceptanceDate,
                       ];
+
+                      //Save the id of the occupation not the name.
                       const bytes32Occupations = this.state.selectedOccupations.map(
                         (occupation) => {
                           return web3.utils.fromAscii(occupation);
@@ -441,10 +449,14 @@ class NewMember extends Component {
                             email: "",
                             selectedOccupations: [],
                             acceptanceDate: "",
-                            currentCategory: "categorySelection",
+                            currentCategory: "cat00",
                             categoryList: occupationCategories,
-                            currentOccupation: "occupationCategories",
+                            currentOccupation: "occ00000",
                             occupationCategoryList: occupations,
+                            applicationFileName: "",
+                            applicationFile: null,
+                            memberAcceptanceFileName: "",
+                            memberAcceptanceFile: null
                           });
                         } else {
                           //Return to the main page.
@@ -629,11 +641,11 @@ class NewMember extends Component {
                 onChange={this.categorySelectHandler}
                 style={{ width: 300 }}
               >
-                <option key="selectCategory" value="categorySelection">
+                <option key="selectCategory" value="cat00">
                   Selecciona una categoría...
                 </option>
                 {this.state.categoryList.map((item) => (
-                  <option key={item.id}>{item.name}</option>
+                  <option key={item.id} value={item.id}>{item.name}</option>
                 ))}
               </select>
             </Form.Field>
@@ -643,9 +655,9 @@ class NewMember extends Component {
                 value={this.state.currentOccupation}
                 onChange={this.occupationSelectHandler}
                 style={{ width: 300 }}
-                disabled={this.state.currentCategory === "categorySelection"}
+                disabled={this.state.currentCategory === "cat00"}
               >
-                <option key="selectOccupation" value="occupationSelection">
+                <option key="selectOccupation" value="occ00000">
                   Selecciona una profesión...
                 </option>
                 {this.state.occupationCategoryList.map((item) =>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./App.css";
 import "semantic-ui-css/semantic.min.css";
 import { Message } from "semantic-ui-react";
-import { Loader } from "../utils/smartloader";
+import { Loader } from "../utils/loader";
 import Layout from "../components/layout/Layout";
 import {
   checkMetaMask,
@@ -100,7 +100,7 @@ function App() {
         ></Route>
         <Route
           exact
-          path="/member/:id"
+          path="/member/:id/:address"
           component={() => (
             <MemberInfo metaMaskConnected={isMetaMaskConnected} />
           )}
