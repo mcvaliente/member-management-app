@@ -100,7 +100,7 @@ function App() {
         ></Route>
         <Route
           exact
-          path="/member/:id/:address"
+          path="/member/:id"
           component={() => (
             <MemberInfo metaMaskConnected={isMetaMaskConnected} />
           )}

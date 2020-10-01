@@ -10,7 +10,7 @@ import {
 } from "../../utils/dappconfig";
 import { getWeb3, checkRinkebyNetwork } from "../../contracts/web3";
 import swal from "sweetalert";
-import Member from "../../contracts/member";
+import factory from "../../contracts/factory";
 import MemberOccupations from "../../components/members/member/MemberOccupations";
 import { Loader } from "../../utils/loader";
 import MemberSearch from '../../components/members/member/MemberSearch';
@@ -18,9 +18,8 @@ import MemberSearch from '../../components/members/member/MemberSearch';
 
 //Using Hooks. 
 const MemberInfo = (props) => {
-  const { id, address } = useParams();
+  const { id } = useParams();
 
-  const [contractAddress, setContractAddress] = useState(address);
   const [name, setName] = useState("");
   const [surname, setSurname] = useState("");
   const [memberID, setMemberID] = useState(id);
@@ -32,6 +31,8 @@ const MemberInfo = (props) => {
   const [selectedOccupations, setSelectedOccupations] = useState([]);
   const [acceptanceDate, setAcceptanceDate] = useState("");
   const [activeMember, setActiveMember] = useState(false);
+  const [applicationFileId, setApplicationFileId] = useState("");
+  const [acceptanceFileId, setAcceptanceFileId] = useState("");
   const [countyList, setCountyList] = useState([]);
   const [officeList, setOfficeList] = useState([]);
   const [currentCategory, setCurrentCategory] = useState("");
@@ -47,7 +48,6 @@ const MemberInfo = (props) => {
     async function GetMemberInfo() {
       try {
         console.log("Parameter id: ", memberID);
-        console.log("Parameter address: ", contractAddress);
         const web3 = getWeb3();
         //We have to check if web3 has a value.
         if (web3) {
@@ -65,18 +65,30 @@ const MemberInfo = (props) => {
           } else {
             const isRinkeby = checkRinkebyNetwork();
             if (isRinkeby) {
-                //Get the member info stored in the blockchain.
-                const member = Member(contractAddress);
-                const memberInfo = await member.methods
-                  .getMemberSummary()
+              const bytes32MemberId = web3.utils.fromAscii(memberID);
+              //Get the member info stored in the blockchain.
+                const memberBasicData = await factory.methods
+                  .getMemberSummary(bytes32MemberId)
                   .call();
-                const result = "[" + JSON.stringify(memberInfo) + "]";
-                ReadMemberSummaryFields(web3, result);
-                //Get the member occupations.
-                const memberOccupations = await member.methods
-                  .getMemberOccupations()
+                const summaryResult = "[" + JSON.stringify(memberBasicData) + "]";
+                ReadMemberSummaryFields(web3, summaryResult);
+                //Get the member location.
+                const memberLocationData = await factory.methods
+                  .getMemberLocation(bytes32MemberId)
+                  .call();
+                const locationResult = "[" + JSON.stringify(memberLocationData) + "]";
+                ReadMemberLocation(web3, locationResult);
+                //Get member occupations.
+                const memberOccupations = await factory.methods
+                  .getMemberOccupations(bytes32MemberId)
                   .call();
                 ReadMemberOccupations(web3, memberOccupations);
+                //Get member files.
+                const memberFilesData = await factory.methods
+                  .getMemberFiles(bytes32MemberId)
+                  .call();
+                const filesResult = "[" + JSON.stringify(memberFilesData) + "]";
+                ReadMemberFiles(filesResult);
             } else {
               swal({
                 title: "Error",
@@ -111,16 +123,23 @@ const MemberInfo = (props) => {
       console.log("Member info: ", memberData);
       const jsonOutput = JSON.parse(memberData);
       for (var j = 0; j < jsonOutput.length; j++) {
-        setMemberID(web3.utils.toAscii(jsonOutput[j]["0"]).replace(/\u0000/g, ''));
-        setBirthdate(web3.utils.toAscii(jsonOutput[j]["1"]).replace(/\u0000/g, ''));
-        setAcceptanceDate(web3.utils.toAscii(jsonOutput[j]["2"]).replace(/\u0000/g, ''));
-        setName(jsonOutput[j]["3"]);
-        setSurname(jsonOutput[j]["4"]);
-        setEmail(jsonOutput[j]["5"])
-        setOffice(web3.utils.toAscii(jsonOutput[j]["6"]).replace(/\u0000/g, ''));
-        setCounty(web3.utils.toAscii(jsonOutput[j]["7"]).replace(/\u0000/g, ''));
-        setCountry(web3.utils.toAscii(jsonOutput[j]["8"]).replace(/\u0000/g, ''));
-        setActiveMember(jsonOutput[j]["9"]);
+        setBirthdate(web3.utils.toAscii(jsonOutput[j]["0"]).replace(/\u0000/g, ''));
+        setAcceptanceDate(web3.utils.toAscii(jsonOutput[j]["1"]).replace(/\u0000/g, ''));
+        setName(jsonOutput[j]["2"]);
+        setSurname(jsonOutput[j]["3"]);
+        setEmail(jsonOutput[j]["4"])
+        setActiveMember(jsonOutput[j]["5"]);
+      }
+    }
+
+    function ReadMemberLocation(web3, memberData) {
+      /* eslint-disable no-control-regex*/
+      console.log("Member location: ", memberData);
+      const jsonOutput = JSON.parse(memberData);
+      for (var j = 0; j < jsonOutput.length; j++) {
+        setOffice(web3.utils.toAscii(jsonOutput[j]["0"]).replace(/\u0000/g, ''));
+        setCounty(web3.utils.toAscii(jsonOutput[j]["1"]).replace(/\u0000/g, ''));
+        setCountry(web3.utils.toAscii(jsonOutput[j]["2"]).replace(/\u0000/g, ''));
       }
     }
 
@@ -131,6 +150,16 @@ const MemberInfo = (props) => {
         mOccupations.push(web3.utils.toAscii(memberData[i]).replace(/\u0000/g, ''));
       }
       setSelectedOccupations(mOccupations);
+    }
+
+    function ReadMemberFiles(memberData) {
+      /* eslint-disable no-control-regex*/
+      console.log("Member files: ", memberData);
+      const jsonOutput = JSON.parse(memberData);
+      for (var j = 0; j < jsonOutput.length; j++) {
+        setApplicationFileId(jsonOutput[j]["0"]);
+        setAcceptanceFileId(jsonOutput[j]["1"])
+      }
     }
 
     //Get the member info from the blockchain.
@@ -153,7 +182,7 @@ const MemberInfo = (props) => {
     setOccupationCategoryList(occupations);
     //We must to include [] in order to execute this only on Mount.
     //We add "memberID" since if it is changes it should be executed:
-  },[memberID, contractAddress]);
+  },[memberID]);
 
   const onClick = () => {
     setEditMode(true);
@@ -211,11 +240,9 @@ const MemberInfo = (props) => {
     setActiveMember(value);
   };
 
-  const memberSearchHandler = (memberId, memberAddress) => {
+  const memberSearchHandler = (memberId) => {
     console.log("New member id to search: ", memberId);
-    console.log("New member contract address: ", memberAddress);
     setMemberID(memberId);
-    setContractAddress(memberAddress);
   }
 
   const onSubmit = (e, data) => {
@@ -226,6 +253,7 @@ const MemberInfo = (props) => {
     setErrorMessage("");
     swal("Pendiente de implementar");
   };
+
 
   return (
     <div className={styles.MemberInfo}>
@@ -275,11 +303,7 @@ const MemberInfo = (props) => {
           <input
             placeholder="NIF / NIE"
             value={memberID}
-            onChange={(event) => setMemberID(event.target.value)}
             style={{ width: 300, background:'#E3E6E7' }}
-            onKeyPress={(e) => {
-              e.key === "Enter" && e.preventDefault();
-            }}
             disabled
           />
         </Form.Field>
@@ -449,7 +473,26 @@ const MemberInfo = (props) => {
             disabled={!editMode}
           />
         </Form.Field>
-        {/*TODO: Add the files to store in IPFS.*/}
+        {/*TODO: Add the files stored in IPFS. They only can be downloaded but not modified.*/}
+        <Form.Field>
+          <label>Fichero de solicitud</label>
+          {/*The application file cannot be updated. Only downloaded: TODO.*/}
+          <input
+            value={applicationFileId}
+            style={{ width: 425, background:'#E3E6E7' }}
+            disabled
+          />
+        </Form.Field>
+        <Form.Field>
+          <label>Certificado de aceptación</label>
+          {/*The acceptance file cannot be updated. Only downloaded: TODO.*/}
+          <input
+            value={acceptanceFileId}
+            style={{ width: 425, background:'#E3E6E7' }}
+            disabled
+          />
+        </Form.Field>
+
         <Message error content={errorMessage} />
         <div className={styles.memberInfoButtonSection}>
           {editMode ? (

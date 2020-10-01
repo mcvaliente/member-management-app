@@ -8,18 +8,16 @@ import MemberSearch from "./member/MemberSearch";
 function Members (props) {
 
     const [memberId, setMemberId] = useState('');
-    const [memberAddress, setMemberAddress] = useState('');
     const [memberInfoRedirect, setMemberInfoRedirect] = useState(false);
 
-    const memberSearchHandler = (memberId, memberAddress) => {
+    const memberSearchHandler = (memberId) => {
         console.log("New member id to search: ", memberId);
         setMemberId(memberId);
-        setMemberAddress(memberAddress);
         setMemberInfoRedirect(true);
     }
     
     if (memberInfoRedirect){
-        return <Redirect to={`/member/${memberId}/${memberAddress}`}></Redirect>
+        return <Redirect to={`/member/${memberId}`}></Redirect>
     }
 
     return (

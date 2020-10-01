@@ -4,11 +4,10 @@ import factory from "../../contracts/factory";
 import swal from "sweetalert";
 
 const MemberSearchBar = (props) => {
-
   const [loading, setLoading] = useState(false);
 
-  const memberHandler = (memberId, memberAddress) => {
-    props.memberIdHandler(memberId, memberAddress);
+  const memberHandler = (memberId) => {
+    props.memberIdHandler(memberId);
   };
 
   const keyPressHandler = (e) => {
@@ -39,20 +38,17 @@ const MemberSearchBar = (props) => {
         } else {
           const isRinkeby = checkRinkebyNetwork();
           if (isRinkeby) {
-            //Check that the member has been included.
-            const bytes32MemberId = web3.utils.fromAscii(memberId);
             //Check that we don't have the same ID in the cooperative.
-            const memberAddress = await factory.methods
-              .getMemberAddress(bytes32MemberId)
+            const bytes32MemberId = web3.utils.fromAscii(memberId);
+            const existingMember = await factory.methods
+              .memberExists(bytes32MemberId)
               .call();
-            console.log("Contract address for this member ID: ", memberAddress);
+            console.log("Search - Existing member: ", existingMember);
             setLoading(false);
-            if (
-              memberAddress !== "0x0000000000000000000000000000000000000000"
-            ) {
+            if (existingMember) {
               //The member ID has been found in the blockchain.
               //We assign the props.
-              memberHandler(memberId, memberAddress);
+              memberHandler(memberId);
             } else {
               swal({
                 title: "Error",
@@ -96,7 +92,6 @@ const MemberSearchBar = (props) => {
     }
   };
 
-
   return (
     <div
       className={loading ? "ui loading icon input" : "ui icon input"}
@@ -111,6 +106,6 @@ const MemberSearchBar = (props) => {
       <i aria-hidden="true" className="search icon"></i>
     </div>
   );
-}
+};
 
 export default MemberSearchBar;

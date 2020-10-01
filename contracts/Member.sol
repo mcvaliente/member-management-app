@@ -23,7 +23,7 @@ contract MemberFactory {
         bytes32 county;
         bytes32 country;
     }
-    
+
     struct FileInfo {
         string applicationFileId;
         string acceptanceFileId;
@@ -31,6 +31,7 @@ contract MemberFactory {
 
     mapping(bytes16 => MemberInfo) members; //NIF/NIE for the identification of a member (bytes16).
     bytes16[] deployedMembers;
+    mapping(bytes16 => bool) activeMembers;
 
     function createMember(
         bytes16 memberId,
@@ -44,7 +45,7 @@ contract MemberFactory {
         string memory acceptanceFileId
     ) public {
         PersonalInfo memory personalData = PersonalInfo({
-           birthdate: memberDates[0],
+            birthdate: memberDates[0],
             name: name,
             surname: surname,
             email: email
@@ -57,8 +58,8 @@ contract MemberFactory {
         });
 
         FileInfo memory fileData = FileInfo({
-           applicationFileId: applicationFileId,
-           acceptanceFileId: acceptanceFileId
+            applicationFileId: applicationFileId,
+            acceptanceFileId: acceptanceFileId
         });
 
         MemberInfo memory newMember = MemberInfo({
@@ -69,13 +70,22 @@ contract MemberFactory {
             memberFiles: fileData,
             isActive: true
         });
-        
+
         members[memberId] = newMember;
+        activeMembers[memberId] = true;
         deployedMembers.push(memberId);
     }
 
     function getMemberCount() public view returns (uint256) {
         return deployedMembers.length;
+    }
+
+    function memberExists(bytes16 memberId) public view returns (bool) {
+        if (activeMembers[memberId]) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     function getMemberSummary(bytes16 memberId)
@@ -99,14 +109,15 @@ contract MemberFactory {
             members[memberId].isActive
         );
     }
-    
+
     function getMemberLocation(bytes16 memberId)
         public
         view
         returns (
             bytes32,
             bytes32,
-            bytes32        )
+            bytes32
+        )
     {
         return (
             members[memberId].memberLocation.office,
@@ -115,16 +126,22 @@ contract MemberFactory {
         );
     }
 
-    function getMemberOccupations(bytes16 memberId) public view returns (bytes32[] memory) {
+    function getMemberOccupations(bytes16 memberId)
+        public
+        view
+        returns (bytes32[] memory)
+    {
         return members[memberId].occupations;
     }
 
-    function getMemberFiles(bytes16 memberId) public view returns (string memory, string memory) {
+    function getMemberFiles(bytes16 memberId)
+        public
+        view
+        returns (string memory, string memory)
+    {
         return (
             members[memberId].memberFiles.applicationFileId,
-        members[memberId].memberFiles.acceptanceFileId
+            members[memberId].memberFiles.acceptanceFileId
         );
     }
-
 }
-

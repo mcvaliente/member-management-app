@@ -46,10 +46,12 @@ class NewMember extends Component {
     officeList: [],
     currentCategory: "",
     currentOccupation: "",
+    applicationFileId: "",
     applicationFileName: "",
-    applicationFile: null,
-    memberAcceptanceFileName: "",
-    memberAcceptanceFile: null,
+    //applicationFile: null,
+    acceptanceFileId: "",
+    acceptanceFileName: "",
+    //acceptanceFile: null,
     occupationCategoryList: [],
     categoryList: [],
     loading: false,
@@ -128,32 +130,41 @@ class NewMember extends Component {
     console.log("Uploaded application file object: ", fileUploaded);
     let reader = new FileReader();
     reader.readAsDataURL(fileUploaded);
+    //this.setState({
+    //  applicationFileName: fileUploaded.name,
+    //  applicationFile: fileUploaded,
+    //});
     this.setState({
-      applicationFileName: fileUploaded.name,
-      applicationFile: fileUploaded,
+      applicationFileName: fileUploaded.name
     });
   };
 
   deleteApplicationFileClickHandler = () => {
-    this.setState({ applicationFileName: "", applicationFile: null });
+    //this.setState({ applicationFileName: "", applicationFile: null });
+    this.setState({ applicationFileName: "" });
   };
 
   onDocumentLoadSuccess = (filename) => {
     console.log("Filename:", filename);
   };
 
-  memberAcceptanceFileSelectionHandler = (fileUploaded) => {
+  acceptanceFileSelectionHandler = (fileUploaded) => {
     console.log("Uploaded acceptance member file object", fileUploaded);
     let reader = new FileReader();
     reader.readAsDataURL(fileUploaded);
+    //this.setState({
+    //  acceptanceFileName: fileUploaded.name,
+    //  //acceptanceFile: fileUploaded,
+    //});
     this.setState({
-      memberAcceptanceFileName: fileUploaded.name,
-      memberAcceptanceFile: fileUploaded,
+      acceptanceFileName: fileUploaded.name,
+      //acceptanceFile: fileUploaded,
     });
   };
 
-  deleteMemberAcceptanceFileClickHandler = () => {
-    this.setState({ memberAcceptanceFileName: "", memberAcceptanceFile: null });
+  deleteAcceptanceFileClickHandler = () => {
+    //this.setState({ acceptanceFileName: "", acceptanceFile: null });
+    this.setState({ acceptanceFileName: "" });
   };
 
   onSubmit = async (e) => {
@@ -172,9 +183,9 @@ class NewMember extends Component {
       selectedOccupations,
       acceptanceDate,
       applicationFileName,
-      applicationFile,
-      memberAcceptanceFileName,
-      memberAcceptanceFile
+      //applicationFile,
+      acceptanceFileName,
+      //acceptanceFile
     } = this.state;
 
     //Reset the error message to an empty string.
@@ -307,7 +318,7 @@ class NewMember extends Component {
 
       //Check application file.
       if (validMember) {
-        validMember = memberAcceptanceFileName !== '';
+        validMember = acceptanceFileName !== '';
         if (!validMember) {
           this.setState({
             errorMessage:
@@ -349,23 +360,13 @@ class NewMember extends Component {
                   console.log("Web3 accounts: ", accounts);
                   const isRinkeby = checkRinkebyNetwork();
                   if (isRinkeby) {
-                    //Get the current account.
-                    const currentAccount = getCurrentAccount();
-                    const bytes32MemberId = web3.utils.fromAscii(
-                      this.state.memberID
-                    );
                     //Check that we don't have the same ID in the cooperative.
-                    const memberAddress = await factory.methods
-                      .getMemberAddress(bytes32MemberId)
+                    const bytes32MemberId = web3.utils.fromAscii(this.state.memberID);
+                    const existingMember = await factory.methods
+                      .memberExists(bytes32MemberId)
                       .call();
-                    console.log(
-                      "Contract address for this member ID: ",
-                      memberAddress
-                    );
-                    if (
-                      memberAddress !==
-                      "0x0000000000000000000000000000000000000000"
-                    ) {
+                    console.log("Existing member: ", existingMember);
+                    if (existingMember) {
                       this.setState({ loading: false, errorMessage: "" });
                       swal({
                         title: "Error",
@@ -408,6 +409,13 @@ class NewMember extends Component {
                         bytes32MemberCountry,
                       ];
 
+                      // TODO: Add the functionality to store the files in IPFS.
+                      //TESTING: We will have the hashes from IPFS for each file.
+                      const applicationFileId = "AnPs55rrWMXcRVuK8HqCcXABCSPn6HDrd9ngjEzMTKdDtD";
+                      const acceptanceFileId = "QmNs55rrWMXcRVuK8HqCcXCHLSPn6HDrd9ngjEzMTKdDtX";
+
+                      //Get the current account.
+                      const currentAccount = getCurrentAccount();
                       await factory.methods
                         .createMember(
                           bytes32MemberId,
@@ -416,14 +424,14 @@ class NewMember extends Component {
                           this.state.surname,
                           this.state.email,
                           bytes32MemberLocation,
-                          bytes32Occupations
+                          bytes32Occupations,
+                          applicationFileId,
+                          acceptanceFileId
                         )
                         .send({
                           from: currentAccount,
                           gas: "2000000",
                         });
-
-                      // TODO: Add the functionality to store the files in IPFS.
 
                       this.setState({ loading: false, errorMessage: "" });
                       swal({
@@ -454,9 +462,9 @@ class NewMember extends Component {
                             currentOccupation: "occ00000",
                             occupationCategoryList: occupations,
                             applicationFileName: "",
-                            applicationFile: null,
-                            memberAcceptanceFileName: "",
-                            memberAcceptanceFile: null
+                            //applicationFile: null,
+                            acceptanceFileName: "",
+                            //acceptanceFile: null
                           });
                         } else {
                           //Return to the main page.
@@ -742,22 +750,22 @@ class NewMember extends Component {
               <label style={{ marginRight: "50px", width: 180 }}>
                 Certificado de aceptación
               </label>
-              {!!this.state.memberAcceptanceFileName ? (
+              {!!this.state.acceptanceFileName ? (
                 <>
                   <Image src={srcAttachFileIcon} spaced="right" />
                   <label style={{ marginLeft: "2px" }}>
-                    {this.state.memberAcceptanceFileName}
+                    {this.state.acceptanceFileName}
                   </label>
                   <Image
-                    key="btnDeleteMemberAcceptanceFile"
+                    key="btnDeleteAcceptanceFile"
                     src={srcDeleteIcon}
-                    onClick={this.deleteMemberAcceptanceFileClickHandler}
+                    onClick={this.deleteAcceptanceFileClickHandler}
                     style={{ cursor: "pointer", marginLeft: "20px" }}
                   />
                 </>
               ) : (
                 <FileUploader
-                  handleFile={this.memberAcceptanceFileSelectionHandler}
+                  handleFile={this.acceptanceFileSelectionHandler}
                   metaMaskConnected={this.props.metaMaskConnected}
                 />
               )}
