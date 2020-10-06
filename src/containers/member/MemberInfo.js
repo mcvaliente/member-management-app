@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { NavLink, useParams } from "react-router-dom";
 import { Divider, Form, Input, Message, Icon } from "semantic-ui-react";
 import styles from "../../assets/css/MemberInfo.module.css";
@@ -14,6 +14,13 @@ import factory from "../../contracts/factory";
 import MemberOccupations from "../../components/members/member/MemberOccupations";
 import { Loader } from "../../utils/loader";
 import MemberSearch from '../../components/members/member/MemberSearch';
+import {
+  checkEmail,
+  checkTextField,
+  checkDateField,
+  greaterThanCurrentDate,
+  checkListField,
+} from "../../components/members/member/MemberValidation";
 
 
 //Using Hooks. 
@@ -40,8 +47,14 @@ const MemberInfo = (props) => {
   const [occupationCategoryList, setOccupationCategoryList] = useState([]);
   const [categoryList, setCategoryList] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
   const [editMode, setEditMode] = useState(false);
+  const [inputError, setInputError] = useState({});
+
+  const inputNameRef = useRef();
+  const inputSurnameRef = useRef();
+  const inputBirthdateRef = useRef();
+  const inputEmailRef = useRef();
+  const inputAcceptanceDateRef = useRef();
 
   //useEffect executes only when the memberID state changes.
   useEffect(() => {
@@ -54,7 +67,7 @@ const MemberInfo = (props) => {
           //Check account.
           const accounts = await web3.eth.getAccounts();
           if (accounts.length === 0) {
-            setErrorMessage("");
+            setInputError({});
             swal({
               title: "Error",
               text:
@@ -245,13 +258,102 @@ const MemberInfo = (props) => {
     setMemberID(memberId);
   }
 
-  const onSubmit = (e, data) => {
+  const onSubmit = (e) => {
     e.preventDefault();
-    setLoading(true);
-    console.log("onSubmit data: ", data);
-    setLoading(false);
-    setErrorMessage("");
-    swal("Pendiente de implementar");
+    let validMember = true;
+    let errors = {};
+    setInputError({});
+    try {
+      //FIELD VALIDATION
+
+      //Check name
+      if (validMember) {
+        validMember = checkTextField(name);
+        if (!validMember) {
+          errors.name = "Por favor, introduce un nombre para el socio/a.";
+          setInputError(errors);
+          inputNameRef.current.focus();
+        }
+      }
+
+      //Check surname
+      if (validMember) {
+        validMember = checkTextField(surname);
+        if (!validMember) {
+          errors.surname = "Por favor, introduce apellidos para el socio/a.";
+          setInputError(errors);
+          inputSurnameRef.current.focus();
+        }
+      }
+
+      //Check birthDate
+      if (validMember) {
+        validMember = checkDateField(birthdate);
+        if (!validMember) {
+          errors.birthdate = "Por favor, introduce la fecha de nacimiento del socio/a de acuerdo al formato dd/mm/aaaa.";
+          setInputError(errors);
+          inputBirthdateRef.current.focus();
+        } else {
+          validMember = greaterThanCurrentDate(birthdate);
+          if (!validMember) {
+            errors.birthdate = "La fecha de nacimiento no puede ser posterior a la fecha actual.";
+            setInputError(errors);
+            inputBirthdateRef.current.focus();
+          }
+        }
+      }
+
+      //Check email
+      if (validMember) {
+        validMember = checkEmail(email);
+        if (!validMember) {
+          errors.email = "Por favor, introduce un email válido.";
+          setInputError(errors);
+          inputEmailRef.current.focus();
+        }
+      }
+
+      //Check acceptance date
+      if (validMember) {
+        validMember = checkDateField(acceptanceDate);
+        if (!validMember) {
+          errors.acceptanceDate = "Por favor, introduce una fecha de aceptación válida de acuerdo al formato dd/mm/aaaa.";
+          setInputError(errors);
+          inputAcceptanceDateRef.current.focus();
+        } else {
+          validMember = greaterThanCurrentDate(acceptanceDate);
+          if (!validMember) {
+            errors.acceptanceDate = "La fecha de aceptación no puede ser posterior a la fecha actual.";
+            setInputError(errors);
+            inputAcceptanceDateRef.current.focus();
+          }
+        }
+      }
+
+      if (validMember) {
+        //All the fields are OK.
+        //Request confirmation from the user in order to save the member in the Blockchain.
+        swal({
+          title: "¿Continuar?",
+          text:
+            "Se va a proceder al registro de la persona socia en la Blockchain de Rinkeby Test Network.",
+          icon: "warning",
+          buttons: ["Cancelar", "Aceptar"],
+          dangerMode: true,
+        }).then(async (willContinue) => {
+          if (willContinue) {
+            setLoading(false);
+            setInputError({});
+            swal("Pendiente de implementar");
+          }
+        });
+      }
+    } catch (error) {
+      setLoading(false);
+      setInputError({});
+      errors.general = error.message;
+      setInputError(errors);
+    }
   };
 
 
@@ -277,7 +379,7 @@ const MemberInfo = (props) => {
       <Divider style={{ width: 900 }} />
       <Form
         onSubmit={onSubmit}
-        error={!!errorMessage}
+        error={!!inputError}
         style={{ width: "100%" }}
       >
         <Form.Field>
@@ -319,7 +421,9 @@ const MemberInfo = (props) => {
                 e.key === "Enter" && e.preventDefault();
               }}
               disabled={!editMode}
+              ref={inputNameRef}
             />
+          <Message error content={inputError.name} />
           </Form.Field>
           <Form.Field>
             <label>Apellidos</label>
@@ -332,7 +436,9 @@ const MemberInfo = (props) => {
               }}
               style={{ width: 500 }}
               disabled={!editMode}
+              ref={inputSurnameRef}
             />
+          <Message error content={inputError.surname} />
           </Form.Field>
         </Form.Group>
         <Form.Group widths="equal">
@@ -347,7 +453,9 @@ const MemberInfo = (props) => {
                 e.key === "Enter" && e.preventDefault();
               }}
               disabled={!editMode}
+              ref={inputBirthdateRef}
             />
+            <Message error content={inputError.birthdate} />
           </Form.Field>
           <Form.Field>              
               <label>Provincia de residencia</label>
@@ -407,10 +515,12 @@ const MemberInfo = (props) => {
             onChange={(event) => setEmail(event.target.value)}
             style={{ width: 400 }}
             disabled={!editMode}
-          >
+            ref={inputEmailRef}
+            >
             <Icon name="at" />
             <input />
           </Input>
+          <Message error content={inputError.email} />
         </Form.Field>
         {editMode ? 
           <Form.Group>
@@ -471,7 +581,9 @@ const MemberInfo = (props) => {
               e.key === "Enter" && e.preventDefault();
             }}
             disabled={!editMode}
+            ref={inputAcceptanceDateRef}
           />
+          <Message error content={inputError.acceptanceDate} />
         </Form.Field>
         {/*TODO: Add the files stored in IPFS. They only can be downloaded but not modified.*/}
         <Form.Field>
@@ -493,7 +605,7 @@ const MemberInfo = (props) => {
           />
         </Form.Field>
 
-        <Message error content={errorMessage} />
+        <Message error content={inputError.general} />
         <div className={styles.memberInfoButtonSection}>
           {editMode ? (
             props.metaMaskConnected ? (
