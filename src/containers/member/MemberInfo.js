@@ -104,6 +104,8 @@ const MemberInfo = (props) => {
                 .call();
               const filesResult = "[" + JSON.stringify(memberFilesData) + "]";
               ReadMemberFiles(filesResult);
+              //Reset the edit mode.
+              setEditMode(false);
             } else {
               swal({
                 title: "Error",
