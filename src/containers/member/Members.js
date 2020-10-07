@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, Redirect } from "react-router-dom";
 import { Divider } from 'semantic-ui-react';
 import styles from '../../assets/css/Members.module.css';
-import MemberSearch from "./member/MemberSearch";
+import MemberSearch from "../../components/member/MemberSearch";
 
 //Using Hooks.
 function Members (props) {

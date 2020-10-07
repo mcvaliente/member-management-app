@@ -15,7 +15,7 @@ import {
   checkDateField,
   greaterThanCurrentDate,
   checkListField,
-} from "../../components/members/member/MemberValidation";
+} from "../../components/member/MemberValidation";
 import {
   getWeb3,
   checkRinkebyNetwork,
@@ -25,10 +25,11 @@ import swal from "sweetalert";
 import factory from "../../contracts/factory";
 import { Loader } from "../../utils/loader";
 import FileUploader from "../../utils/FileUploader";
-import MemberOccupations from "../../components/members/member/MemberOccupations";
+import MemberOccupations from "../../components/member/MemberOccupations";
 
 const srcAttachFileIcon = "/images/attach-file-icon.svg";
 const srcDeleteIcon = "/images/delete-icon.svg";
+const web3 = getWeb3();
 
 class NewMember extends Component {
   state = {
@@ -59,22 +60,59 @@ class NewMember extends Component {
     returnMainPage: false,
   };
 
-  componentDidMount() {
-    //Set the initial values of the Select controls for
-    //County, Office, Category and Occupations.
-    //Counties
-    this.setState({ countyList: counties });
+  async componentDidMount() {
+    if (web3) {
+      //Check account.
+      const accounts = await web3.eth.getAccounts();
+      if (accounts.length === 0) {
+        this.setState({ loading: false, errorMessage: "" });
+        swal({
+          title: "Error",
+          text:
+            "Por favor, conéctate a una cuenta de MetaMask para poder realizar el registro.",
+          icon: "error",
+          button: "Aceptar",
+        });
+      } else {
+        console.log("Web3 accounts: ", accounts);
+        const isRinkeby = checkRinkebyNetwork();
+        if (isRinkeby) {
+          //Set the initial values of the Select controls for
+          //County, Office, Category and Occupations.
+          //Counties
+          this.setState({ countyList: counties });
 
-    //Offices
-    this.setState({ officeList: offices });
+          //Offices
+          this.setState({ officeList: offices });
 
-    //Categories
-    this.setState({ currentCategory: "cat00" });
-    this.setState({ categoryList: occupationCategories });
+          //Categories
+          this.setState({ currentCategory: "cat00" });
+          this.setState({ categoryList: occupationCategories });
 
-    //Occupations
-    this.setState({ currentOccupation: "occ00000" });
-    this.setState({ occupationCategoryList: occupations });
+          //Occupations
+          this.setState({ currentOccupation: "occ00000" });
+          this.setState({ occupationCategoryList: occupations });
+        } else {
+          this.setState({ loading: false, errorMessage: "" });
+          swal({
+            title: "Error",
+            text:
+              "Por favor, selecciona la red Rinkeby para poder realizar el registro.",
+            icon: "error",
+            button: "Aceptar",
+          });
+        }
+      }
+    } else {
+      this.setState({ loading: false, errorMessage: "" });
+      swal({
+        title: "Error",
+        text:
+          "Se ha producido un error al intentar conectarse a la instancia de MetaMask.",
+        icon: "error",
+        button: "Aceptar",
+      });
+    }
   }
 
   countySelectHandler = (e) => {
@@ -103,11 +141,11 @@ class NewMember extends Component {
 
   occupationSelectHandler = (e) => {
     //console.log("Selected occupation: " + e.target.value);
-    let newOccupation = e.target.value;    
+    let newOccupation = e.target.value;
     if (e.target.value !== "occ00000") {
       const occupationsList = [...this.state.selectedOccupations];
       //Check that the occupation length is <= 32.
-      if (newOccupation.length > 32){
+      if (newOccupation.length > 32) {
         //Get 32 characters.
         newOccupation = newOccupation.substring(0, 31);
       }
@@ -135,7 +173,7 @@ class NewMember extends Component {
     //  applicationFile: fileUploaded,
     //});
     this.setState({
-      applicationFileName: fileUploaded.name
+      applicationFileName: fileUploaded.name,
     });
   };
 
@@ -170,6 +208,7 @@ class NewMember extends Component {
   onSubmit = async (e) => {
     e.preventDefault();
     let validMember = true;
+    const bytes16MemberId = web3.utils.fromAscii(this.state.memberID);
 
     //Shortcut for states of this class.
     const {
@@ -193,14 +232,23 @@ class NewMember extends Component {
 
     try {
       //FIELD VALIDATION
-
       //Check memberId
       validMember = checkID(memberID);
       if (!validMember) {
         this.setState({
           errorMessage:
-            "Por favor, introduce una identificación válida (NIF/NIE)."
+            "Por favor, introduce una identificación válida (NIF/NIE).",
         });
+      } else {
+        //Check that we don't have the same ID in the cooperative.
+        const existingMember = await factory.methods
+          .memberExists(bytes16MemberId)
+          .call();
+        console.log("Existing member: ", existingMember);
+        if (existingMember) {
+          validMember = false;
+          this.setState({ errorMessage: "Ya existe una persona socia con la misma identificación." });
+        }
       }
 
       //Check name
@@ -208,7 +256,7 @@ class NewMember extends Component {
         validMember = checkTextField(name);
         if (!validMember) {
           this.setState({
-            errorMessage: "Por favor, introduce el nombre del nuevo/a socio/a."
+            errorMessage: "Por favor, introduce el nombre del nuevo/a socio/a.",
           });
         }
       }
@@ -219,7 +267,7 @@ class NewMember extends Component {
         if (!validMember) {
           this.setState({
             errorMessage:
-              "Por favor, introduce los apellidos del nuevo/a socio/a."
+              "Por favor, introduce los apellidos del nuevo/a socio/a.",
           });
         }
       }
@@ -230,14 +278,14 @@ class NewMember extends Component {
         if (!validMember) {
           this.setState({
             errorMessage:
-              "Por favor, introduce una fecha de nacimiento válida de acuerdo al formato dd/mm/aaaa."
+              "Por favor, introduce una fecha de nacimiento válida de acuerdo al formato dd/mm/aaaa.",
           });
         } else {
           validMember = greaterThanCurrentDate(birthdate);
           if (!validMember) {
             this.setState({
               errorMessage:
-                "La fecha de nacimiento no puede ser posterior a la fecha actual."
+                "La fecha de nacimiento no puede ser posterior a la fecha actual.",
             });
           }
         }
@@ -249,7 +297,7 @@ class NewMember extends Component {
         if (!validMember) {
           this.setState({
             errorMessage:
-              "Por favor, selecciona la provincia de residencia del nuevo/a socio/a."
+              "Por favor, selecciona la provincia de residencia del nuevo/a socio/a.",
           });
         }
       }
@@ -260,7 +308,7 @@ class NewMember extends Component {
         if (!validMember) {
           this.setState({
             errorMessage:
-              "Por favor, selecciona la delegación a la que pertenece el nuevo/a socio/a."
+              "Por favor, selecciona la delegación a la que pertenece el nuevo/a socio/a.",
           });
         }
       }
@@ -270,7 +318,7 @@ class NewMember extends Component {
         validMember = checkEmail(email);
         if (!validMember) {
           this.setState({
-            errorMessage: "Por favor, introduce un email válido."
+            errorMessage: "Por favor, introduce un email válido.",
           });
         }
       }
@@ -281,7 +329,7 @@ class NewMember extends Component {
         if (!validMember) {
           this.setState({
             errorMessage:
-              "Por favor, selecciona la profesión(es) del nuevo/a socio/a."
+              "Por favor, selecciona la profesión(es) del nuevo/a socio/a.",
           });
         }
       }
@@ -299,7 +347,7 @@ class NewMember extends Component {
           if (!validMember) {
             this.setState({
               errorMessage:
-                "La fecha de aceptación no puede ser posterior a la fecha actual."
+                "La fecha de aceptación no puede ser posterior a la fecha actual.",
             });
           }
         }
@@ -307,22 +355,22 @@ class NewMember extends Component {
 
       //Check application file.
       if (validMember) {
-        validMember = applicationFileName !== '';
+        validMember = applicationFileName !== "";
         if (!validMember) {
           this.setState({
             errorMessage:
-              "Por favor, selecciona el fichero de solicitud asociado al alta del nuevo/a socio/a."
+              "Por favor, selecciona el fichero de solicitud asociado al alta del nuevo/a socio/a.",
           });
         }
       }
 
       //Check application file.
       if (validMember) {
-        validMember = acceptanceFileName !== '';
+        validMember = acceptanceFileName !== "";
         if (!validMember) {
           this.setState({
             errorMessage:
-              "Por favor, selecciona el fichero de aceptación del nuevo/a socio/a."
+              "Por favor, selecciona el fichero de aceptación del nuevo/a socio/a.",
           });
         }
       }
@@ -341,167 +389,95 @@ class NewMember extends Component {
           if (willContinue) {
             //Show loading and reset the error message to an empty string.
             this.setState({ loading: true, errorMessage: "" });
-            try {
-              const web3 = getWeb3();
-              //We have to check if web3 has a value.
-              if (web3) {
-                //Check account.
-                const accounts = await web3.eth.getAccounts();
-                if (accounts.length === 0) {
-                  this.setState({ loading: false, errorMessage: "" });
-                  swal({
-                    title: "Error",
-                    text:
-                      "Por favor, conéctate a una cuenta de MetaMask para poder realizar el registro.",
-                    icon: "error",
-                    button: "Aceptar",
-                  });
-                } else {
-                  console.log("Web3 accounts: ", accounts);
-                  const isRinkeby = checkRinkebyNetwork();
-                  if (isRinkeby) {
-                    //Check that we don't have the same ID in the cooperative.
-                    const bytes32MemberId = web3.utils.fromAscii(this.state.memberID);
-                    const existingMember = await factory.methods
-                      .memberExists(bytes32MemberId)
-                      .call();
-                    console.log("Existing member: ", existingMember);
-                    if (existingMember) {
-                      this.setState({ loading: false, errorMessage: "" });
-                      swal({
-                        title: "Error",
-                        text:
-                          "Ya existe una persona socia con la misma identificación.",
-                        icon: "error",
-                        button: "Aceptar",
-                      });
-                    } else {
-                      //Create the new member indicating the creator of this member.
-                      const bytes32Birthdate = web3.utils.fromAscii(
-                        this.state.birthdate
-                      );
-                      const bytes32AcceptanceDate = web3.utils.fromAscii(
-                        this.state.acceptanceDate
-                      );
-                      const bytes32MemberDates = [
-                        bytes32Birthdate,
-                        bytes32AcceptanceDate,
-                      ];
+            //We have to check if web3 has a value.
+            //Create the new member indicating the creator of this member.
+            const bytes16Birthdate = web3.utils.fromAscii(this.state.birthdate);
+            const bytes16AcceptanceDate = web3.utils.fromAscii(
+              this.state.acceptanceDate
+            );
+            const bytes16MemberDates = [
+              bytes16Birthdate,
+              bytes16AcceptanceDate,
+            ];
 
-                      //Save the id of the occupation not the name.
-                      const bytes32Occupations = this.state.selectedOccupations.map(
-                        (occupation) => {
-                          return web3.utils.fromAscii(occupation);
-                        }
-                      );
-                      const bytes32MemberOffice = web3.utils.fromAscii(
-                        this.state.office
-                      );
-                      const bytes32MemberCounty = web3.utils.fromAscii(
-                        this.state.county
-                      );
-                      const bytes32MemberCountry = web3.utils.fromAscii(
-                        this.state.country
-                      );
-                      const bytes32MemberLocation = [
-                        bytes32MemberOffice,
-                        bytes32MemberCounty,
-                        bytes32MemberCountry,
-                      ];
-
-                      // TODO: Add the functionality to store the files in IPFS.
-                      //TESTING: We will have the hashes from IPFS for each file.
-                      const applicationFileId = "AnPs55rrWMXcRVuK8HqCcXABCSPn6HDrd9ngjEzMTKdDtD";
-                      const acceptanceFileId = "QmNs55rrWMXcRVuK8HqCcXCHLSPn6HDrd9ngjEzMTKdDtX";
-
-                      //Get the current account.
-                      const currentAccount = getCurrentAccount();
-                      await factory.methods
-                        .createMember(
-                          bytes32MemberId,
-                          bytes32MemberDates,
-                          this.state.name,
-                          this.state.surname,
-                          this.state.email,
-                          bytes32MemberLocation,
-                          bytes32Occupations,
-                          applicationFileId,
-                          acceptanceFileId
-                        )
-                        .send({
-                          from: currentAccount,
-                          gas: "2000000",
-                        });
-
-                      this.setState({ loading: false, errorMessage: "" });
-                      swal({
-                        title: "Has añadido a este socio/a correctamente.",
-                        text: "¿Qué quieres hacer ahora?",
-                        icon: "success",
-                        buttons: [
-                          "Volver a la pantalla principal",
-                          "Añadir socio/a",
-                        ],
-                      }).then(async (willContinue) => {
-                        if (willContinue) {
-                          //Add a new member.
-                          //Reset the form fields.
-                          this.setState({
-                            name: "",
-                            surname: "",
-                            memberID: "",
-                            birthdate: "",
-                            county: "",
-                            office: "",
-                            country: "España",
-                            email: "",
-                            selectedOccupations: [],
-                            acceptanceDate: "",
-                            currentCategory: "cat00",
-                            categoryList: occupationCategories,
-                            currentOccupation: "occ00000",
-                            occupationCategoryList: occupations,
-                            applicationFileName: "",
-                            //applicationFile: null,
-                            acceptanceFileName: "",
-                            //acceptanceFile: null
-                          });
-                        } else {
-                          //Return to the main page.
-                          this.setState({ returnMainPage: true });
-                        }
-                      });
-                    }
-                  } else {
-                    this.setState({ loading: false, errorMessage: "" });
-                    swal({
-                      title: "Error",
-                      text:
-                        "Por favor, selecciona la red Rinkeby para poder realizar el registro.",
-                      icon: "error",
-                      button: "Aceptar",
-                    });
-                  }
-                }
-              } else {
-                this.setState({ loading: false, errorMessage: "" });
-                swal({
-                  title: "Error",
-                  text:
-                    "Se ha producido un error al intentar conectarse a la instancia de MetaMask.",
-                  icon: "error",
-                  button: "Aceptar",
-                });
+            //Save the id of the occupation not the name.
+            const bytes16Occupations = this.state.selectedOccupations.map(
+              (occupation) => {
+                return web3.utils.fromAscii(occupation);
               }
-            } catch (error) {
-              this.setState({ loading: false, errorMessage: "" });
-              swal({
-                title: "Error",
-                text: error.message,
-                icon: "error",
-                button: "Aceptar",
+            );
+            const bytes16MemberOffice = web3.utils.fromAscii(this.state.office);
+            const bytes16MemberCounty = web3.utils.fromAscii(this.state.county);
+            const bytes16MemberCountry = web3.utils.fromAscii(
+              this.state.country
+            );
+            const bytes16MemberLocation = [
+              bytes16MemberOffice,
+              bytes16MemberCounty,
+              bytes16MemberCountry,
+            ];
+
+            // TODO: Add the functionality to store the files in IPFS.
+            //TESTING: We will have the hashes from IPFS for each file.
+            const applicationFileId =
+              "AnPs55rrWMXcRVuK8HqCcXABCSPn6HDrd9ngjEzMTKdDtD";
+            const acceptanceFileId =
+              "QmNs55rrWMXcRVuK8HqCcXCHLSPn6HDrd9ngjEzMTKdDtX";
+
+            //Get the current account.
+            const currentAccount = getCurrentAccount();
+            await factory.methods
+              .createMember(
+                bytes16MemberId,
+                bytes16MemberDates,
+                this.state.name,
+                this.state.surname,
+                this.state.email,
+                bytes16MemberLocation,
+                bytes16Occupations,
+                applicationFileId,
+                acceptanceFileId
+              )
+              .send({
+                from: currentAccount,
+                gas: "2000000",
               });
-            }
+
+            this.setState({ loading: false, errorMessage: "" });
+            swal({
+              title: "Has añadido a este socio/a correctamente.",
+              text: "¿Qué quieres hacer ahora?",
+              icon: "success",
+              buttons: ["Volver a la pantalla principal", "Añadir socio/a"],
+            }).then(async (willContinue) => {
+              if (willContinue) {
+                //Add a new member.
+                //Reset the form fields.
+                this.setState({
+                  name: "",
+                  surname: "",
+                  memberID: "",
+                  birthdate: "",
+                  county: "",
+                  office: "",
+                  country: "España",
+                  email: "",
+                  selectedOccupations: [],
+                  acceptanceDate: "",
+                  currentCategory: "cat00",
+                  categoryList: occupationCategories,
+                  currentOccupation: "occ00000",
+                  occupationCategoryList: occupations,
+                  applicationFileName: "",
+                  //applicationFile: null,
+                  acceptanceFileName: "",
+                  //acceptanceFile: null
+                });
+              } else {
+                //Return to the main page.
+                this.setState({ returnMainPage: true });
+              }
+            });
           }
         });
       }
@@ -653,7 +629,9 @@ class NewMember extends Component {
                   Selecciona una categoría...
                 </option>
                 {this.state.categoryList.map((item) => (
-                  <option key={item.id} value={item.id}>{item.name}</option>
+                  <option key={item.id} value={item.id}>
+                    {item.name}
+                  </option>
                 ))}
               </select>
             </Form.Field>

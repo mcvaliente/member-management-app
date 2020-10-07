@@ -1,6 +1,6 @@
 import React from "react";
-import MemberSearchBar from "../../../containers/member/MemberSearchBar";
-import styles from '../../../assets/css/Members.module.css';
+import MemberSearchBar from "../../containers/member/MemberSearchBar";
+import styles from '../../assets/css/Members.module.css';
 
 const MemberSearch = ( props ) => {   
     return (

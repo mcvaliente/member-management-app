@@ -30,7 +30,7 @@ contract MemberFactory {
     }
 
     mapping(bytes16 => MemberInfo) members; //NIF/NIE for the identification of a member (bytes16).
-    bytes16[] deployedMembers;
+    uint32 deployedMembers;
     mapping(bytes16 => bool) activeMembers;
 
     function createMember(
@@ -73,11 +73,11 @@ contract MemberFactory {
 
         members[memberId] = newMember;
         activeMembers[memberId] = true;
-        deployedMembers.push(memberId);
+        deployedMembers++;
     }
 
-    function getMemberCount() public view returns (uint256) {
-        return deployedMembers.length;
+    function getMemberCount() public view returns (uint32) {
+        return deployedMembers;
     }
 
     function memberExists(bytes16 memberId) public view returns (bool) {
@@ -143,5 +143,44 @@ contract MemberFactory {
             members[memberId].memberFiles.applicationFileId,
             members[memberId].memberFiles.acceptanceFileId
         );
+    }
+
+    function updateMember(
+        bool activeMember,
+        bytes16 memberId,
+        bytes16[] memory memberDates,
+        string memory name,
+        string memory surname,
+        string memory email,
+        bytes32[] memory location,
+        bytes32[] memory occupations
+    ) public {
+        PersonalInfo memory personalData = PersonalInfo({
+            birthdate: memberDates[0],
+            name: name,
+            surname: surname,
+            email: email
+        });
+
+        LocationInfo memory locationData = LocationInfo({
+            office: location[0],
+            county: location[1],
+            country: location[2]
+        });
+    
+        MemberInfo memory updatedMember = MemberInfo({
+            personalData: personalData,
+            memberLocation: locationData,
+            occupations: occupations,
+            acceptanceDate: memberDates[1],
+            memberFiles: members[memberId].memberFiles,
+            isActive: activeMember
+        });
+
+        members[memberId] = updatedMember;
+        activeMembers[memberId] = activeMember;
+        if (!activeMember){
+            deployedMembers--;
+        }
     }
 }

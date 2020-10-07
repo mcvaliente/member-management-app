@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import MetaMask from "../ethereum/MetaMask";
 import Rinkeby from "../ethereum/Rinkeby";
-import Members from "../members/Members";
+import Members from "../../containers/member/Members";
 import styles from "../../assets/css/Home.module.css";
 import { Grid } from "semantic-ui-react";
 

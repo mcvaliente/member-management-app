@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { getWeb3, checkRinkebyNetwork } from "../../contracts/web3";
 import factory from "../../contracts/factory";
 import swal from "sweetalert";
 
 const MemberSearchBar = (props) => {
   const [loading, setLoading] = useState(false);
+
+  const inputMemberIdRef = useRef();
 
   const memberHandler = (memberId) => {
     props.memberIdHandler(memberId);
@@ -58,6 +60,10 @@ const MemberSearchBar = (props) => {
                   "' no se encuentra registrada.",
                 icon: "error",
                 button: "Aceptar",
+              }).then((willContinue) => {
+                if (willContinue){
+                  inputMemberIdRef.current.focus();
+                }
               });
             }
           } else {
@@ -102,6 +108,7 @@ const MemberSearchBar = (props) => {
         placeholder="Busca por NIF/NIE..."
         disabled={!props.metaMaskConnected}
         onKeyPress={keyPressHandler}
+        ref={inputMemberIdRef}
       />
       <i aria-hidden="true" className="search icon"></i>
     </div>

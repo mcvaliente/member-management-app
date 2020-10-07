@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { NavLink, useParams } from "react-router-dom";
+import { NavLink, useParams, Redirect } from "react-router-dom";
 import { Divider, Form, Input, Message, Icon } from "semantic-ui-react";
 import styles from "../../assets/css/MemberInfo.module.css";
 import {
@@ -8,22 +8,21 @@ import {
   occupationCategories,
   occupations,
 } from "../../utils/dappconfig";
-import { getWeb3, checkRinkebyNetwork } from "../../contracts/web3";
+import { getWeb3, checkRinkebyNetwork, getCurrentAccount } from "../../contracts/web3";
 import swal from "sweetalert";
 import factory from "../../contracts/factory";
-import MemberOccupations from "../../components/members/member/MemberOccupations";
+import MemberOccupations from "../../components/member/MemberOccupations";
 import { Loader } from "../../utils/loader";
-import MemberSearch from '../../components/members/member/MemberSearch';
+import MemberSearch from "../../components/member/MemberSearch";
 import {
   checkEmail,
   checkTextField,
   checkDateField,
   greaterThanCurrentDate,
   checkListField,
-} from "../../components/members/member/MemberValidation";
+} from "../../components/member/MemberValidation";
 
-
-//Using Hooks. 
+//Using Hooks.
 const MemberInfo = (props) => {
   const { id } = useParams();
 
@@ -49,12 +48,14 @@ const MemberInfo = (props) => {
   const [loading, setLoading] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [inputError, setInputError] = useState({});
+  const [returnMainPage, setReturnMainPage] = useState(false);
 
   const inputNameRef = useRef();
   const inputSurnameRef = useRef();
   const inputBirthdateRef = useRef();
   const inputEmailRef = useRef();
   const inputAcceptanceDateRef = useRef();
+  const inputCategoriesRef = useRef();
 
   //useEffect executes only when the memberID state changes.
   useEffect(() => {
@@ -78,30 +79,31 @@ const MemberInfo = (props) => {
           } else {
             const isRinkeby = checkRinkebyNetwork();
             if (isRinkeby) {
-              const bytes32MemberId = web3.utils.fromAscii(memberID);
+              const bytes16MemberId = web3.utils.fromAscii(memberID);
               //Get the member info stored in the blockchain.
-                const memberBasicData = await factory.methods
-                  .getMemberSummary(bytes32MemberId)
-                  .call();
-                const summaryResult = "[" + JSON.stringify(memberBasicData) + "]";
-                ReadMemberSummaryFields(web3, summaryResult);
-                //Get the member location.
-                const memberLocationData = await factory.methods
-                  .getMemberLocation(bytes32MemberId)
-                  .call();
-                const locationResult = "[" + JSON.stringify(memberLocationData) + "]";
-                ReadMemberLocation(web3, locationResult);
-                //Get member occupations.
-                const memberOccupations = await factory.methods
-                  .getMemberOccupations(bytes32MemberId)
-                  .call();
-                ReadMemberOccupations(web3, memberOccupations);
-                //Get member files.
-                const memberFilesData = await factory.methods
-                  .getMemberFiles(bytes32MemberId)
-                  .call();
-                const filesResult = "[" + JSON.stringify(memberFilesData) + "]";
-                ReadMemberFiles(filesResult);
+              const memberBasicData = await factory.methods
+                .getMemberSummary(bytes16MemberId)
+                .call();
+              const summaryResult = "[" + JSON.stringify(memberBasicData) + "]";
+              ReadMemberSummaryFields(web3, summaryResult);
+              //Get the member location.
+              const memberLocationData = await factory.methods
+                .getMemberLocation(bytes16MemberId)
+                .call();
+              const locationResult =
+                "[" + JSON.stringify(memberLocationData) + "]";
+              ReadMemberLocation(web3, locationResult);
+              //Get member occupations.
+              const memberOccupations = await factory.methods
+                .getMemberOccupations(bytes16MemberId)
+                .call();
+              ReadMemberOccupations(web3, memberOccupations);
+              //Get member files.
+              const memberFilesData = await factory.methods
+                .getMemberFiles(bytes16MemberId)
+                .call();
+              const filesResult = "[" + JSON.stringify(memberFilesData) + "]";
+              ReadMemberFiles(filesResult);
             } else {
               swal({
                 title: "Error",
@@ -133,26 +135,36 @@ const MemberInfo = (props) => {
 
     function ReadMemberSummaryFields(web3, memberData) {
       /* eslint-disable no-control-regex*/
-      console.log("Member info: ", memberData);
+      //console.log("Member info: ", memberData);
       const jsonOutput = JSON.parse(memberData);
       for (var j = 0; j < jsonOutput.length; j++) {
-        setBirthdate(web3.utils.toAscii(jsonOutput[j]["0"]).replace(/\u0000/g, ''));
-        setAcceptanceDate(web3.utils.toAscii(jsonOutput[j]["1"]).replace(/\u0000/g, ''));
+        setBirthdate(
+          web3.utils.toAscii(jsonOutput[j]["0"]).replace(/\u0000/g, "")
+        );
+        setAcceptanceDate(
+          web3.utils.toAscii(jsonOutput[j]["1"]).replace(/\u0000/g, "")
+        );
         setName(jsonOutput[j]["2"]);
         setSurname(jsonOutput[j]["3"]);
-        setEmail(jsonOutput[j]["4"])
+        setEmail(jsonOutput[j]["4"]);
         setActiveMember(jsonOutput[j]["5"]);
       }
     }
 
     function ReadMemberLocation(web3, memberData) {
       /* eslint-disable no-control-regex*/
-      console.log("Member location: ", memberData);
+      //console.log("Member location: ", memberData);
       const jsonOutput = JSON.parse(memberData);
       for (var j = 0; j < jsonOutput.length; j++) {
-        setOffice(web3.utils.toAscii(jsonOutput[j]["0"]).replace(/\u0000/g, ''));
-        setCounty(web3.utils.toAscii(jsonOutput[j]["1"]).replace(/\u0000/g, ''));
-        setCountry(web3.utils.toAscii(jsonOutput[j]["2"]).replace(/\u0000/g, ''));
+        setOffice(
+          web3.utils.toAscii(jsonOutput[j]["0"]).replace(/\u0000/g, "")
+        );
+        setCounty(
+          web3.utils.toAscii(jsonOutput[j]["1"]).replace(/\u0000/g, "")
+        );
+        setCountry(
+          web3.utils.toAscii(jsonOutput[j]["2"]).replace(/\u0000/g, "")
+        );
       }
     }
 
@@ -160,24 +172,26 @@ const MemberInfo = (props) => {
       console.log("Member occupations: ", memberData);
       const mOccupations = [];
       for (var i = 0; i < memberData.length; i++) {
-        mOccupations.push(web3.utils.toAscii(memberData[i]).replace(/\u0000/g, ''));
+        mOccupations.push(
+          web3.utils.toAscii(memberData[i]).replace(/\u0000/g, "")
+        );
       }
       setSelectedOccupations(mOccupations);
     }
 
     function ReadMemberFiles(memberData) {
       /* eslint-disable no-control-regex*/
-      console.log("Member files: ", memberData);
+      //console.log("Member files: ", memberData);
       const jsonOutput = JSON.parse(memberData);
       for (var j = 0; j < jsonOutput.length; j++) {
         setApplicationFileId(jsonOutput[j]["0"]);
-        setAcceptanceFileId(jsonOutput[j]["1"])
+        setAcceptanceFileId(jsonOutput[j]["1"]);
       }
     }
 
     //Get the member info from the blockchain.
     GetMemberInfo();
-    
+
     //Set the initial values of the Select controls for
     //County, Office, Category and Occupations (Edition mode).
     //Counties
@@ -195,7 +209,7 @@ const MemberInfo = (props) => {
     setOccupationCategoryList(occupations);
     //We must to include [] in order to execute this only on Mount.
     //We add "memberID" since if it is changes it should be executed:
-  },[memberID]);
+  }, [memberID]);
 
   const onClick = () => {
     setEditMode(true);
@@ -209,7 +223,6 @@ const MemberInfo = (props) => {
 
   const officeSelectHandler = (e) => {
     //console.log ("Selected office: " + e.target.value);
-
     if (e.target.value !== "officeSelection") {
       setOffice(e.target.value);
     }
@@ -217,7 +230,8 @@ const MemberInfo = (props) => {
 
   const categorySelectHandler = (e) => {
     //console.log ("Selected category: " + e.target.value);
-
+    //Reset the errors.
+    setInputError({});
     if (e.target.value !== "cat00") {
       setCurrentCategory(e.target.value);
     }
@@ -229,7 +243,7 @@ const MemberInfo = (props) => {
     if (newOccupation !== "occ00000") {
       const occupationsList = [...selectedOccupations];
       //Check that the occupation length is <= 32.
-      if (newOccupation.length > 32){
+      if (newOccupation.length > 32) {
         //Get 32 characters.
         newOccupation = newOccupation.substring(0, 31);
       }
@@ -256,7 +270,7 @@ const MemberInfo = (props) => {
   const memberSearchHandler = (memberId) => {
     console.log("New member id to search: ", memberId);
     setMemberID(memberId);
-  }
+  };
 
   const onSubmit = (e) => {
     e.preventDefault();
@@ -290,13 +304,15 @@ const MemberInfo = (props) => {
       if (validMember) {
         validMember = checkDateField(birthdate);
         if (!validMember) {
-          errors.birthdate = "Por favor, introduce la fecha de nacimiento del socio/a de acuerdo al formato dd/mm/aaaa.";
+          errors.birthdate =
+            "Por favor, introduce la fecha de nacimiento del socio/a de acuerdo al formato dd/mm/aaaa.";
           setInputError(errors);
           inputBirthdateRef.current.focus();
         } else {
           validMember = greaterThanCurrentDate(birthdate);
           if (!validMember) {
-            errors.birthdate = "La fecha de nacimiento no puede ser posterior a la fecha actual.";
+            errors.birthdate =
+              "La fecha de nacimiento no puede ser posterior a la fecha actual.";
             setInputError(errors);
             inputBirthdateRef.current.focus();
           }
@@ -313,17 +329,32 @@ const MemberInfo = (props) => {
         }
       }
 
+      //Check occupations.
+      if (validMember) {
+        validMember = checkListField(selectedOccupations);
+        if (!validMember) {
+          errors.occupations =
+            "Por favor, selecciona la profesión(es) vinculadas al socio/a.";
+          setInputError(errors);
+          setCurrentCategory("cat00");
+          setCurrentOccupation("occ00000");
+          inputCategoriesRef.current.focus();
+        }
+      }
+
       //Check acceptance date
       if (validMember) {
         validMember = checkDateField(acceptanceDate);
         if (!validMember) {
-          errors.acceptanceDate = "Por favor, introduce una fecha de aceptación válida de acuerdo al formato dd/mm/aaaa.";
+          errors.acceptanceDate =
+            "Por favor, introduce una fecha de aceptación válida de acuerdo al formato dd/mm/aaaa.";
           setInputError(errors);
           inputAcceptanceDateRef.current.focus();
         } else {
           validMember = greaterThanCurrentDate(acceptanceDate);
           if (!validMember) {
-            errors.acceptanceDate = "La fecha de aceptación no puede ser posterior a la fecha actual.";
+            errors.acceptanceDate =
+              "La fecha de aceptación no puede ser posterior a la fecha actual.";
             setInputError(errors);
             inputAcceptanceDateRef.current.focus();
           }
@@ -336,15 +367,116 @@ const MemberInfo = (props) => {
         swal({
           title: "¿Continuar?",
           text:
-            "Se va a proceder al registro de la persona socia en la Blockchain de Rinkeby Test Network.",
+            "Se va a proceder a modificar el registro de la persona socia en la Blockchain de Rinkeby Test Network.",
           icon: "warning",
           buttons: ["Cancelar", "Aceptar"],
           dangerMode: true,
         }).then(async (willContinue) => {
           if (willContinue) {
-            setLoading(false);
+            //Show loading and reset the error message to an empty string.
+            setLoading(true);
             setInputError({});
-            swal("Pendiente de implementar");
+            try {
+              const web3 = getWeb3();
+              //We have to check if web3 has a value.
+              if (web3) {
+                //Check account.
+                const accounts = await web3.eth.getAccounts();
+                if (accounts.length === 0) {
+                  setLoading(false);
+                  swal({
+                    title: "Error",
+                    text:
+                      "Por favor, conéctate a una cuenta de MetaMask para poder realizar el registro.",
+                    icon: "error",
+                    button: "Aceptar",
+                  });
+                } else {
+                  //console.log("Web3 accounts: ", accounts);
+                  const isRinkeby = checkRinkebyNetwork();
+                  if (isRinkeby) {
+                    //Create the new member indicating the creator of this member.
+                    const bytes16MemberId = web3.utils.fromAscii(memberID);
+                    const bytes16Birthdate = web3.utils.fromAscii(birthdate);
+                    const bytes16AcceptanceDate = web3.utils.fromAscii(acceptanceDate);
+                    const bytes16MemberDates = [bytes16Birthdate, bytes16AcceptanceDate];
+
+                    //Save the id of the occupation not the name.
+                    const bytes16Occupations = selectedOccupations.map(
+                      (occupation) => {
+                        return web3.utils.fromAscii(occupation);
+                      }
+                    );
+                    const bytes16MemberOffice = web3.utils.fromAscii(office);
+                    const bytes16MemberCounty = web3.utils.fromAscii(county);
+                    const bytes16MemberCountry = web3.utils.fromAscii(country);
+                    const bytes16MemberLocation = [bytes16MemberOffice, bytes16MemberCounty, bytes16MemberCountry];
+
+                    //Get the current account.
+                    const currentAccount = getCurrentAccount();
+                    await factory.methods
+                      .updateMember(
+                        activeMember,
+                        bytes16MemberId,
+                        bytes16MemberDates,
+                        name,
+                        surname,
+                        email,
+                        bytes16MemberLocation,
+                        bytes16Occupations
+                      )
+                      .send({
+                        from: currentAccount,
+                        gas: "2000000",
+                      });
+
+                    setLoading(false);
+                    swal({
+                      title: "La información del socio/a se ha actualizado correctamente.",
+                      text: "¿Qué quieres hacer ahora?",
+                      icon: "success",
+                      buttons: [
+                        "Volver a la pantalla principal",
+                        "Cerrar",
+                      ],
+                    }).then(async (willContinue) => {
+                      if (willContinue) {
+                        setEditMode(false);
+                      } else {
+                        //Return to the main page.
+                        setReturnMainPage(true);
+                      }
+                    });
+                  } else {
+                    setLoading(false);
+                    swal({
+                      title: "Error",
+                      text:
+                        "Por favor, selecciona la red Rinkeby para poder realizar el registro.",
+                      icon: "error",
+                      button: "Aceptar",
+                    });
+                  }
+                }
+              } else {
+                setLoading(false);
+                swal({
+                  title: "Error",
+                  text:
+                    "Se ha producido un error al intentar conectarse a la instancia de MetaMask.",
+                  icon: "error",
+                  button: "Aceptar",
+                });
+              }
+            } catch (error) {
+              setLoading(false);
+              swal({
+                title: "Error",
+                text: error.message,
+                icon: "error",
+                button: "Aceptar",
+              });
+            }
           }
         });
       }
@@ -356,18 +488,24 @@ const MemberInfo = (props) => {
     }
   };
 
-
+  if (returnMainPage) {
+    return <Redirect to="/" />;
+  }
+  
   return (
     <div className={styles.MemberInfo}>
-      <div style={{ marginBottom:"30px"}}>
+      <div style={{ marginBottom: "30px" }}>
         <NavLink to="/">Volver</NavLink>
       </div>
-      <MemberSearch metaMaskConnected = {props.metaMaskConnected} memberIdHandler = {memberSearchHandler} />
+      <MemberSearch
+        metaMaskConnected={props.metaMaskConnected}
+        memberIdHandler={memberSearchHandler}
+      />
       <Divider style={{ width: 900 }} />
       <span className={styles.memberInfoSpan}>
         Hemos encontrado un resultado con NIF/NIE: <strong>{memberID}</strong>
       </span>
-      {props.metaMaskConnected ? (
+      {props.metaMaskConnected  && memberID ? (
         <button className={styles.memberInfoButton} onClick={onClick}>
           Editar perfil
         </button>
@@ -377,11 +515,7 @@ const MemberInfo = (props) => {
         </button>
       )}
       <Divider style={{ width: 900 }} />
-      <Form
-        onSubmit={onSubmit}
-        error={!!inputError}
-        style={{ width: "100%" }}
-      >
+      <Form onSubmit={onSubmit} error={!!inputError} style={{ width: "100%" }}>
         <Form.Field>
           <div
             className={
@@ -405,7 +539,7 @@ const MemberInfo = (props) => {
           <input
             placeholder="NIF / NIE"
             value={memberID}
-            style={{ width: 300, background:'#E3E6E7' }}
+            style={{ width: 300, background: "#E3E6E7" }}
             disabled
           />
         </Form.Field>
@@ -423,7 +557,7 @@ const MemberInfo = (props) => {
               disabled={!editMode}
               ref={inputNameRef}
             />
-          <Message error content={inputError.name} />
+            <Message error content={inputError.name} />
           </Form.Field>
           <Form.Field>
             <label>Apellidos</label>
@@ -438,7 +572,7 @@ const MemberInfo = (props) => {
               disabled={!editMode}
               ref={inputSurnameRef}
             />
-          <Message error content={inputError.surname} />
+            <Message error content={inputError.surname} />
           </Form.Field>
         </Form.Group>
         <Form.Group widths="equal">
@@ -457,39 +591,41 @@ const MemberInfo = (props) => {
             />
             <Message error content={inputError.birthdate} />
           </Form.Field>
-          <Form.Field>              
-              <label>Provincia de residencia</label>
-              <select
-                value={county}
-                onChange={countySelectHandler}
-                style={{ width: 300 }}
-                disabled={!editMode}
-              >
-                <option key="selectCounty" value="countySelection">
-                  Selecciona una provincia...
+          <Form.Field>
+            <label>Provincia de residencia</label>
+            <select
+              value={county}
+              onChange={countySelectHandler}
+              style={{ width: 300 }}
+              disabled={!editMode}
+            >
+              <option key="selectCounty" value="countySelection">
+                Selecciona una provincia...
+              </option>
+              {countyList.map((item) => (
+                <option key={item.id} value={item.name}>
+                  {item.name}
                 </option>
-                {countyList.map((item) => (
-                  <option key={item.id} value={item.name}>{item.name}</option>
-                ))}
-              </select>
+              ))}
+            </select>
           </Form.Field>
         </Form.Group>
         <Form.Group widths="equal">
-        <Form.Field>
-              <label>Delegación</label>
-              <select
-                value={office}
-                onChange={officeSelectHandler}
-                style={{ width: 300 }}
-                disabled={!editMode}
-              >
-                <option key="selectOffice" value="officeSelection">
-                  Selecciona una delegación...
-                </option>
-                {officeList.map((item) => (
-                  <option key={item.id}>{item.name}</option>
-                ))}
-              </select>
+          <Form.Field>
+            <label>Delegación</label>
+            <select
+              value={office}
+              onChange={officeSelectHandler}
+              style={{ width: 300 }}
+              disabled={!editMode}
+            >
+              <option key="selectOffice" value="officeSelection">
+                Selecciona una delegación...
+              </option>
+              {officeList.map((item) => (
+                <option key={item.id}>{item.name}</option>
+              ))}
+            </select>
           </Form.Field>
           <Form.Field>
             <label>País</label>
@@ -516,13 +652,13 @@ const MemberInfo = (props) => {
             style={{ width: 400 }}
             disabled={!editMode}
             ref={inputEmailRef}
-            >
+          >
             <Icon name="at" />
             <input />
           </Input>
           <Message error content={inputError.email} />
         </Form.Field>
-        {editMode ? 
+        {editMode ? (
           <Form.Group>
             <Form.Field>
               <label>Categoría</label>
@@ -530,14 +666,18 @@ const MemberInfo = (props) => {
                 value={currentCategory}
                 onChange={categorySelectHandler}
                 style={{ width: 300 }}
+                ref={inputCategoriesRef}
               >
                 <option key="selectCategory" value="cat00">
                   Selecciona una categoría...
                 </option>
                 {categoryList.map((item) => (
-                  <option key={item.id} value={item.id}>{item.name}</option>
+                  <option key={item.id} value={item.id}>
+                    {item.name}
+                  </option>
                 ))}
               </select>
+              <Message error content={inputError.occupations} />
             </Form.Field>
             <Form.Field>
               <label>Profesión(es)</label>
@@ -558,11 +698,11 @@ const MemberInfo = (props) => {
               </select>
             </Form.Field>
           </Form.Group>
-        :
+        ) : (
           <Form.Field>
-              <label>Profesión(es)</label>
+            <label>Profesión(es)</label>
           </Form.Field>
-        }
+        )}
         <div className={styles.memberInfoOccupationSelectedList}>
           <MemberOccupations
             occupations={selectedOccupations}
@@ -591,7 +731,7 @@ const MemberInfo = (props) => {
           {/*The application file cannot be updated. Only downloaded: TODO.*/}
           <input
             value={applicationFileId}
-            style={{ width: 425, background:'#E3E6E7' }}
+            style={{ width: 425, background: "#E3E6E7" }}
             disabled
           />
         </Form.Field>
@@ -600,7 +740,7 @@ const MemberInfo = (props) => {
           {/*The acceptance file cannot be updated. Only downloaded: TODO.*/}
           <input
             value={acceptanceFileId}
-            style={{ width: 425, background:'#E3E6E7' }}
+            style={{ width: 425, background: "#E3E6E7" }}
             disabled
           />
         </Form.Field>
