@@ -31,6 +31,7 @@ const srcAttachFileIcon = "/images/attach-file-icon.svg";
 const srcDeleteIcon = "/images/delete-icon.svg";
 const web3 = getWeb3();
 
+
 class NewMember extends Component {
   state = {
     name: "",
@@ -56,7 +57,7 @@ class NewMember extends Component {
     occupationCategoryList: [],
     categoryList: [],
     loading: false,
-    errorMessage: "",
+    errorMessages: {},
     returnMainPage: false,
   };
 
@@ -65,7 +66,7 @@ class NewMember extends Component {
       //Check account.
       const accounts = await web3.eth.getAccounts();
       if (accounts.length === 0) {
-        this.setState({ loading: false, errorMessage: "" });
+        this.setState({ loading: false, errorMessages: {} });
         swal({
           title: "Error",
           text:
@@ -93,7 +94,7 @@ class NewMember extends Component {
           this.setState({ currentOccupation: "occ00000" });
           this.setState({ occupationCategoryList: occupations });
         } else {
-          this.setState({ loading: false, errorMessage: "" });
+          this.setState({ loading: false, errorMessages: {} });
           swal({
             title: "Error",
             text:
@@ -104,7 +105,7 @@ class NewMember extends Component {
         }
       }
     } else {
-      this.setState({ loading: false, errorMessage: "" });
+      this.setState({ loading: false, errorMessages: {} });
       swal({
         title: "Error",
         text:
@@ -208,6 +209,7 @@ class NewMember extends Component {
   onSubmit = async (e) => {
     e.preventDefault();
     let validMember = true;
+    let errors = {};
     const bytes16MemberId = web3.utils.fromAscii(this.state.memberID);
 
     //Shortcut for states of this class.
@@ -228,17 +230,16 @@ class NewMember extends Component {
     } = this.state;
 
     //Reset the error message to an empty string.
-    this.setState({ errorMessage: "" });
+    this.setState({ errorMessages: {} });
 
     try {
       //FIELD VALIDATION
       //Check memberId
       validMember = checkID(memberID);
       if (!validMember) {
-        this.setState({
-          errorMessage:
-            "Por favor, introduce una identificación válida (NIF/NIE).",
-        });
+        this.memberIDInputRef.focus();
+        errors["memberID"] = "Por favor, introduce una identificación válida (NIF/NIE).";
+        this.setState({ errorMessages : errors });
       } else {
         //Check that we don't have the same ID in the cooperative.
         const existingMember = await factory.methods
@@ -247,7 +248,9 @@ class NewMember extends Component {
         console.log("Existing member: ", existingMember);
         if (existingMember) {
           validMember = false;
-          this.setState({ errorMessage: "Ya existe una persona socia con la misma identificación." });
+          this.memberIDInputRef.focus();
+          errors["memberID"] = "Ya existe una persona socia con la misma identificación.";
+          this.setState({ errorMessages: errors });
         }
       }
 
@@ -255,9 +258,9 @@ class NewMember extends Component {
       if (validMember) {
         validMember = checkTextField(name);
         if (!validMember) {
-          this.setState({
-            errorMessage: "Por favor, introduce el nombre del nuevo/a socio/a.",
-          });
+          this.nameInputRef.focus();
+          errors["name"] = "Por favor, introduce el nombre del nuevo/a socio/a.";
+          this.setState({ errorMessages: errors });
         }
       }
 
@@ -265,10 +268,9 @@ class NewMember extends Component {
       if (validMember) {
         validMember = checkTextField(surname);
         if (!validMember) {
-          this.setState({
-            errorMessage:
-              "Por favor, introduce los apellidos del nuevo/a socio/a.",
-          });
+          this.surnameInputRef.focus();
+          errors["surname"] = "Por favor, introduce los apellidos del nuevo/a socio/a.";
+          this.setState({ errorMessages: errors });
         }
       }
 
@@ -276,17 +278,15 @@ class NewMember extends Component {
       if (validMember) {
         validMember = checkDateField(birthdate);
         if (!validMember) {
-          this.setState({
-            errorMessage:
-              "Por favor, introduce una fecha de nacimiento válida de acuerdo al formato dd/mm/aaaa.",
-          });
+          this.birthdateInputRef.focus();
+          errors["birthdate"] = "Por favor, introduce una fecha de nacimiento válida de acuerdo al formato dd/mm/aaaa.";
+          this.setState({ errorMessages: errors });
         } else {
           validMember = greaterThanCurrentDate(birthdate);
           if (!validMember) {
-            this.setState({
-              errorMessage:
-                "La fecha de nacimiento no puede ser posterior a la fecha actual.",
-            });
+            this.birthdateInputRef.focus();
+            errors["birthdate"] = "La fecha de nacimiento no puede ser posterior a la fecha actual.";
+            this.setState({ errorMessages: errors });
           }
         }
       }
@@ -295,10 +295,9 @@ class NewMember extends Component {
       if (validMember) {
         validMember = checkTextField(county);
         if (!validMember) {
-          this.setState({
-            errorMessage:
-              "Por favor, selecciona la provincia de residencia del nuevo/a socio/a.",
-          });
+          this.countyInputRef.focus();
+          errors["county"] = "Por favor, selecciona la provincia de residencia del nuevo/a socio/a.";
+          this.setState({ errorMessages: errors });
         }
       }
 
@@ -306,10 +305,9 @@ class NewMember extends Component {
       if (validMember) {
         validMember = checkTextField(office);
         if (!validMember) {
-          this.setState({
-            errorMessage:
-              "Por favor, selecciona la delegación a la que pertenece el nuevo/a socio/a.",
-          });
+          this.officeInputRef.focus();
+          errors["office"] = "Por favor, selecciona la delegación a la que pertenece el nuevo/a socio/a.";
+          this.setState({ errorMessages: errors });
         }
       }
 
@@ -317,9 +315,9 @@ class NewMember extends Component {
       if (validMember) {
         validMember = checkEmail(email);
         if (!validMember) {
-          this.setState({
-            errorMessage: "Por favor, introduce un email válido.",
-          });
+          this.emailInputRef.focus();
+          errors["email"] = "Por favor, introduce un email válido.";
+          this.setState({ errorMessages: errors });
         }
       }
 
@@ -327,10 +325,9 @@ class NewMember extends Component {
       if (validMember) {
         validMember = checkListField(selectedOccupations);
         if (!validMember) {
-          this.setState({
-            errorMessage:
-              "Por favor, selecciona la profesión(es) del nuevo/a socio/a.",
-          });
+          this.occupationsInputRef.focus();
+          errors["occupations"] = "Por favor, selecciona la profesión(es) del nuevo/a socio/a.";
+          this.setState({ errorMessages: errors });
         }
       }
 
@@ -338,40 +335,36 @@ class NewMember extends Component {
       if (validMember) {
         validMember = checkDateField(acceptanceDate);
         if (!validMember) {
-          this.setState({
-            errorMessage:
-              "Por favor, introduce una fecha de aceptación válida de acuerdo al formato dd/mm/aaaa.",
-          });
+          this.acceptanceDateInputRef.focus();
+          errors["acceptanceDate"] = "Por favor, introduce una fecha de aceptación válida de acuerdo al formato dd/mm/aaaa.";
+          this.setState({ errorMessages: errors });
         } else {
           validMember = greaterThanCurrentDate(acceptanceDate);
           if (!validMember) {
-            this.setState({
-              errorMessage:
-                "La fecha de aceptación no puede ser posterior a la fecha actual.",
-            });
+            this.acceptanceDateInputRef.focus();
+            errors["acceptanceDate"] = "La fecha de aceptación no puede ser posterior a la fecha actual.";
+            this.setState({ errorMessages: errors });
           }
         }
       }
 
-      //Check application file.
+      //Check the application file.
       if (validMember) {
         validMember = applicationFileName !== "";
         if (!validMember) {
-          this.setState({
-            errorMessage:
-              "Por favor, selecciona el fichero de solicitud asociado al alta del nuevo/a socio/a.",
-          });
+          this.applicationFileNameInputRef.focus();
+          errors["applicationFileName"] = "Por favor, selecciona el fichero de solicitud asociado al alta del nuevo/a socio/a.";
+          this.setState({ errorMessages: errors });
         }
       }
 
-      //Check application file.
+      //Check the acceptance file.
       if (validMember) {
         validMember = acceptanceFileName !== "";
         if (!validMember) {
-          this.setState({
-            errorMessage:
-              "Por favor, selecciona el fichero de aceptación del nuevo/a socio/a.",
-          });
+          this.acceptanceFileNameInputRef.focus();
+          errors["acceptanceFileName"] = "Por favor, selecciona el fichero de aceptación del nuevo/a socio/a.";
+          this.setState({ errorMessages: errors });
         }
       }
 
@@ -388,7 +381,7 @@ class NewMember extends Component {
         }).then(async (willContinue) => {
           if (willContinue) {
             //Show loading and reset the error message to an empty string.
-            this.setState({ loading: true, errorMessage: "" });
+            this.setState({ loading: true, errorMessages: {} });
             //We have to check if web3 has a value.
             //Create the new member indicating the creator of this member.
             const bytes16Birthdate = web3.utils.fromAscii(this.state.birthdate);
@@ -443,7 +436,7 @@ class NewMember extends Component {
                 gas: "2000000",
               });
 
-            this.setState({ loading: false, errorMessage: "" });
+            this.setState({ loading: false, errorMessages: {} });
             swal({
               title: "Has añadido a este socio/a correctamente.",
               text: "¿Qué quieres hacer ahora?",
@@ -482,7 +475,8 @@ class NewMember extends Component {
         });
       }
     } catch (error) {
-      this.setState({ loading: false, errorMessage: error.message });
+      errors["general"] = error.message;
+      this.setState({ loading: false, errorMessages: errors });
     }
   };
 
@@ -499,7 +493,7 @@ class NewMember extends Component {
         </h3>
         <Form
           onSubmit={this.onSubmit}
-          error={!!this.state.errorMessage}
+          error={!!this.state.errorMessages}
           style={{ width: "100%" }}
         >
           <Form.Field>
@@ -514,7 +508,9 @@ class NewMember extends Component {
               onKeyPress={(e) => {
                 e.key === "Enter" && e.preventDefault();
               }}
+              ref={input => { this.memberIDInputRef = input; }}
             />
+            <Message error content={this.state.errorMessages.memberID} />
           </Form.Field>
           <Form.Group widths="equal">
             <Form.Field>
@@ -529,7 +525,9 @@ class NewMember extends Component {
                 onKeyPress={(e) => {
                   e.key === "Enter" && e.preventDefault();
                 }}
+                ref={input => { this.nameInputRef = input; }}
               />
+              <Message error content={this.state.errorMessages.name} />
             </Form.Field>
             <Form.Field>
               <label>Apellidos</label>
@@ -543,7 +541,9 @@ class NewMember extends Component {
                   e.key === "Enter" && e.preventDefault();
                 }}
                 style={{ width: 500 }}
+                ref={input => { this.surnameInputRef = input; }}
               />
+              <Message error content={this.state.errorMessages.surname} />
             </Form.Field>
           </Form.Group>
           <Form.Group widths="equal">
@@ -559,7 +559,9 @@ class NewMember extends Component {
                 onKeyPress={(e) => {
                   e.key === "Enter" && e.preventDefault();
                 }}
+                ref={input => { this.birthdateInputRef = input; }}
               />
+              <Message error content={this.state.errorMessages.birthdate} />
             </Form.Field>
             <Form.Field>
               <label>Provincia de residencia</label>
@@ -567,6 +569,7 @@ class NewMember extends Component {
                 value={this.state.county}
                 onChange={this.countySelectHandler}
                 style={{ width: 300 }}
+                ref={input => { this.countyInputRef = input; }}
               >
                 <option key="selectCounty" value="countySelection">
                   Selecciona una provincia...
@@ -575,6 +578,7 @@ class NewMember extends Component {
                   <option key={item.id}>{item.name}</option>
                 ))}
               </select>
+              <Message error content={this.state.errorMessages.county} />
             </Form.Field>
           </Form.Group>
           <Form.Group widths="equal">
@@ -584,6 +588,7 @@ class NewMember extends Component {
                 value={this.state.office}
                 onChange={this.officeSelectHandler}
                 style={{ width: 300 }}
+                ref={input => { this.officeInputRef = input; }}
               >
                 <option key="selectOffice" value="officeSelection">
                   Selecciona una delegación...
@@ -592,6 +597,7 @@ class NewMember extends Component {
                   <option key={item.id}>{item.name}</option>
                 ))}
               </select>
+              <Message error content={this.state.errorMessages.office} />
             </Form.Field>
             <Form.Field>
               <label>País</label>
@@ -612,10 +618,12 @@ class NewMember extends Component {
               value={this.state.email}
               onChange={(event) => this.setState({ email: event.target.value })}
               style={{ width: 400 }}
+              ref={input => { this.emailInputRef = input; }}
             >
               <Icon name="at" />
               <input />
             </Input>
+            <Message error content={this.state.errorMessages.email} />
           </Form.Field>
           <Form.Group>
             <Form.Field>
@@ -624,6 +632,7 @@ class NewMember extends Component {
                 value={this.state.currentCategory}
                 onChange={this.categorySelectHandler}
                 style={{ width: 300 }}
+                ref={input => { this.occupationsInputRef = input; }}
               >
                 <option key="selectCategory" value="cat00">
                   Selecciona una categoría...
@@ -634,6 +643,7 @@ class NewMember extends Component {
                   </option>
                 ))}
               </select>
+              <Message error content={this.state.errorMessages.occupations} />
             </Form.Field>
             <Form.Field>
               <label>Profesión(es)</label>
@@ -673,7 +683,9 @@ class NewMember extends Component {
               onKeyPress={(e) => {
                 e.key === "Enter" && e.preventDefault();
               }}
+              ref={input => { this.acceptanceDateInputRef = input; }}
             />
+            <Message error content={this.state.errorMessages.acceptanceDate} />
           </Form.Field>
           <Form.Field>
             <label>Adjuntar archivos</label>
@@ -686,6 +698,7 @@ class NewMember extends Component {
                 flexDirection: "row",
                 alignItems: "center",
               }}
+              ref={input => { this.applicationFileNameInputRef = input; }}
             >
               <label style={{ marginRight: "50px", width: 180 }}>
                 Fichero de solicitud
@@ -716,6 +729,7 @@ class NewMember extends Component {
                 />
               )}
             </div>
+            <Message error content={this.state.errorMessages.applicationFileName} />
           </Form.Field>
           <Form.Field>
             <div
@@ -724,6 +738,7 @@ class NewMember extends Component {
                 flexDirection: "row",
                 alignItems: "center",
               }}
+              ref={input => { this.acceptanceFileNameInputRef = input; }}
             >
               <label style={{ marginRight: "50px", width: 180 }}>
                 Certificado de aceptación
@@ -748,8 +763,9 @@ class NewMember extends Component {
                 />
               )}
             </div>
+            <Message error content={this.state.errorMessages.acceptanceFileName} />
           </Form.Field>
-          <Message error content={this.state.errorMessage} />
+          <Message error content={this.state.errorMessages.general} />
           <div className={styles.newMemberButtonSection}>
             {this.props.metaMaskConnected ? (
               <button className={styles.newMemberButton}>Aceptar</button>

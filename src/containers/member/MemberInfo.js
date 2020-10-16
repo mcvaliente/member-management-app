@@ -47,7 +47,7 @@ const MemberInfo = (props) => {
   const [categoryList, setCategoryList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [inputError, setInputError] = useState({});
+  const [errorMessages, setErrorMessages] = useState({});
   const [returnMainPage, setReturnMainPage] = useState(false);
 
   const inputNameRef = useRef();
@@ -68,7 +68,7 @@ const MemberInfo = (props) => {
           //Check account.
           const accounts = await web3.eth.getAccounts();
           if (accounts.length === 0) {
-            setInputError({});
+            setErrorMessages({});
             swal({
               title: "Error",
               text:
@@ -233,7 +233,7 @@ const MemberInfo = (props) => {
   const categorySelectHandler = (e) => {
     //console.log ("Selected category: " + e.target.value);
     //Reset the errors.
-    setInputError({});
+    setErrorMessages({});
     if (e.target.value !== "cat00") {
       setCurrentCategory(e.target.value);
     }
@@ -278,7 +278,7 @@ const MemberInfo = (props) => {
     e.preventDefault();
     let validMember = true;
     let errors = {};
-    setInputError({});
+    setErrorMessages({});
     try {
       //FIELD VALIDATION
 
@@ -287,7 +287,7 @@ const MemberInfo = (props) => {
         validMember = checkTextField(name);
         if (!validMember) {
           errors.name = "Por favor, introduce un nombre para el socio/a.";
-          setInputError(errors);
+          setErrorMessages(errors);
           inputNameRef.current.focus();
         }
       }
@@ -297,7 +297,7 @@ const MemberInfo = (props) => {
         validMember = checkTextField(surname);
         if (!validMember) {
           errors.surname = "Por favor, introduce apellidos para el socio/a.";
-          setInputError(errors);
+          setErrorMessages(errors);
           inputSurnameRef.current.focus();
         }
       }
@@ -308,14 +308,14 @@ const MemberInfo = (props) => {
         if (!validMember) {
           errors.birthdate =
             "Por favor, introduce la fecha de nacimiento del socio/a de acuerdo al formato dd/mm/aaaa.";
-          setInputError(errors);
+          setErrorMessages(errors);
           inputBirthdateRef.current.focus();
         } else {
           validMember = greaterThanCurrentDate(birthdate);
           if (!validMember) {
             errors.birthdate =
               "La fecha de nacimiento no puede ser posterior a la fecha actual.";
-            setInputError(errors);
+            setErrorMessages(errors);
             inputBirthdateRef.current.focus();
           }
         }
@@ -326,7 +326,7 @@ const MemberInfo = (props) => {
         validMember = checkEmail(email);
         if (!validMember) {
           errors.email = "Por favor, introduce un email válido.";
-          setInputError(errors);
+          setErrorMessages(errors);
           inputEmailRef.current.focus();
         }
       }
@@ -337,7 +337,7 @@ const MemberInfo = (props) => {
         if (!validMember) {
           errors.occupations =
             "Por favor, selecciona la profesión(es) vinculadas al socio/a.";
-          setInputError(errors);
+          setErrorMessages(errors);
           setCurrentCategory("cat00");
           setCurrentOccupation("occ00000");
           inputCategoriesRef.current.focus();
@@ -350,14 +350,14 @@ const MemberInfo = (props) => {
         if (!validMember) {
           errors.acceptanceDate =
             "Por favor, introduce una fecha de aceptación válida de acuerdo al formato dd/mm/aaaa.";
-          setInputError(errors);
+          setErrorMessages(errors);
           inputAcceptanceDateRef.current.focus();
         } else {
           validMember = greaterThanCurrentDate(acceptanceDate);
           if (!validMember) {
             errors.acceptanceDate =
               "La fecha de aceptación no puede ser posterior a la fecha actual.";
-            setInputError(errors);
+            setErrorMessages(errors);
             inputAcceptanceDateRef.current.focus();
           }
         }
@@ -377,7 +377,7 @@ const MemberInfo = (props) => {
           if (willContinue) {
             //Show loading and reset the error message to an empty string.
             setLoading(true);
-            setInputError({});
+            setErrorMessages({});
             try {
               const web3 = getWeb3();
               //We have to check if web3 has a value.
@@ -484,9 +484,9 @@ const MemberInfo = (props) => {
       }
     } catch (error) {
       setLoading(false);
-      setInputError({});
+      setErrorMessages({});
       errors.general = error.message;
-      setInputError(errors);
+      setErrorMessages(errors);
     }
   };
 
@@ -517,7 +517,7 @@ const MemberInfo = (props) => {
         </button>
       )}
       <Divider style={{ width: 900 }} />
-      <Form onSubmit={onSubmit} error={!!inputError} style={{ width: "100%" }}>
+      <Form onSubmit={onSubmit} error={!!errorMessages} style={{ width: "100%" }}>
         <Form.Field>
           <div
             className={
@@ -559,7 +559,7 @@ const MemberInfo = (props) => {
               disabled={!editMode}
               ref={inputNameRef}
             />
-            <Message error content={inputError.name} />
+            <Message error content={errorMessages.name} />
           </Form.Field>
           <Form.Field>
             <label>Apellidos</label>
@@ -574,7 +574,7 @@ const MemberInfo = (props) => {
               disabled={!editMode}
               ref={inputSurnameRef}
             />
-            <Message error content={inputError.surname} />
+            <Message error content={errorMessages.surname} />
           </Form.Field>
         </Form.Group>
         <Form.Group widths="equal">
@@ -591,7 +591,7 @@ const MemberInfo = (props) => {
               disabled={!editMode}
               ref={inputBirthdateRef}
             />
-            <Message error content={inputError.birthdate} />
+            <Message error content={errorMessages.birthdate} />
           </Form.Field>
           <Form.Field>
             <label>Provincia de residencia</label>
@@ -658,7 +658,7 @@ const MemberInfo = (props) => {
             <Icon name="at" />
             <input />
           </Input>
-          <Message error content={inputError.email} />
+          <Message error content={errorMessages.email} />
         </Form.Field>
         {editMode ? (
           <Form.Group>
@@ -679,7 +679,7 @@ const MemberInfo = (props) => {
                   </option>
                 ))}
               </select>
-              <Message error content={inputError.occupations} />
+              <Message error content={errorMessages.occupations} />
             </Form.Field>
             <Form.Field>
               <label>Profesión(es)</label>
@@ -725,7 +725,7 @@ const MemberInfo = (props) => {
             disabled={!editMode}
             ref={inputAcceptanceDateRef}
           />
-          <Message error content={inputError.acceptanceDate} />
+          <Message error content={errorMessages.acceptanceDate} />
         </Form.Field>
         {/*TODO: Add the files stored in IPFS. They only can be downloaded but not modified.*/}
         <Form.Field>
@@ -747,7 +747,7 @@ const MemberInfo = (props) => {
           />
         </Form.Field>
 
-        <Message error content={inputError.general} />
+        <Message error content={errorMessages.general} />
         <div className={styles.memberInfoButtonSection}>
           {editMode ? (
             props.metaMaskConnected ? (
