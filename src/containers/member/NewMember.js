@@ -2,35 +2,26 @@ import React, { Component } from "react";
 import { Form, Input, Message, Icon, Image } from "semantic-ui-react";
 import { NavLink, Redirect } from "react-router-dom";
 import styles from "../../assets/css/NewMember.module.css";
-import {
-  counties,
-  offices,
-  occupationCategories,
-  occupations,
-} from "../../utils/dappconfig";
+import { counties, offices, occupationCategories, occupations } from "../../utils/dappconfig";
 import {
   checkEmail,
   checkTextField,
   checkID,
   checkDateField,
   greaterThanCurrentDate,
-  checkListField,
+  checkListField
 } from "../../components/member/MemberValidation";
-import {
-  getWeb3,
-  checkRinkebyNetwork,
-  getCurrentAccount,
-} from "../../contracts/web3";
+import { getWeb3, checkRinkebyNetwork, getCurrentAccount } from "../../contracts/web3";
 import swal from "sweetalert";
 import factory from "../../contracts/factory";
 import { Loader } from "../../utils/loader";
 import FileUploader from "../../utils/FileUploader";
 import MemberOccupations from "../../components/member/MemberOccupations";
+import ipfs from "../../storage/ipfs";
 
 const srcAttachFileIcon = "/images/attach-file-icon.svg";
 const srcDeleteIcon = "/images/delete-icon.svg";
 const web3 = getWeb3();
-
 
 class NewMember extends Component {
   state = {
@@ -48,12 +39,11 @@ class NewMember extends Component {
     officeList: [],
     currentCategory: "",
     currentOccupation: "",
-    applicationFileId: "",
     applicationFileName: "",
-    //applicationFile: null,
+    applicationFileBuffer: "",
     acceptanceFileId: "",
     acceptanceFileName: "",
-    //acceptanceFile: null,
+    acceptanceFileBuffer: "",
     occupationCategoryList: [],
     categoryList: [],
     loading: false,
@@ -166,50 +156,56 @@ class NewMember extends Component {
   };
 
   applicationFileSelectionHandler = (fileUploaded) => {
-    console.log("Uploaded application file object: ", fileUploaded);
+    //console.log("Uploaded application file object: ", fileUploaded);
     let reader = new FileReader();
-    reader.readAsDataURL(fileUploaded);
-    //this.setState({
-    //  applicationFileName: fileUploaded.name,
-    //  applicationFile: fileUploaded,
-    //});
-    this.setState({
-      applicationFileName: fileUploaded.name,
-    });
+    reader.readAsArrayBuffer(fileUploaded);
+    reader.onloadend = async () => {
+      const buffer = await this.convertFileToBuffer(reader);
+      //Set the buffer.
+      console.log("Buffer: ", buffer);
+      this.setState({
+        applicationFileName: fileUploaded.name,
+        applicationFileBuffer: buffer,
+      });
+    };
   };
 
   deleteApplicationFileClickHandler = () => {
-    //this.setState({ applicationFileName: "", applicationFile: null });
-    this.setState({ applicationFileName: "" });
-  };
-
-  onDocumentLoadSuccess = (filename) => {
-    console.log("Filename:", filename);
+    this.setState({ applicationFileName: "", applicationFileBuffer: "" });
   };
 
   acceptanceFileSelectionHandler = (fileUploaded) => {
-    console.log("Uploaded acceptance member file object", fileUploaded);
+    //console.log("Uploaded acceptance member file object", fileUploaded);
     let reader = new FileReader();
-    reader.readAsDataURL(fileUploaded);
-    //this.setState({
-    //  acceptanceFileName: fileUploaded.name,
-    //  //acceptanceFile: fileUploaded,
-    //});
-    this.setState({
-      acceptanceFileName: fileUploaded.name,
-      //acceptanceFile: fileUploaded,
-    });
+    reader.readAsArrayBuffer(fileUploaded);
+    reader.onloadend = async () => {
+      const buffer = await this.convertFileToBuffer(reader);
+      //Set the buffer.
+      console.log("Buffer: ", buffer);
+      this.setState({
+        acceptanceFileName: fileUploaded.name,
+        acceptanceFileBuffer: buffer,
+      });
+    };
   };
 
   deleteAcceptanceFileClickHandler = () => {
-    //this.setState({ acceptanceFileName: "", acceptanceFile: null });
-    this.setState({ acceptanceFileName: "" });
+    this.setState({ acceptanceFileName: "", acceptanceFileBuffer: "" });
+  };
+
+  convertFileToBuffer = async (reader) => {
+    //File is converted to a buffer in IPFS loading.
+    console.log("File reader: ", reader);
+    return await Buffer.from(reader.result);
   };
 
   onSubmit = async (e) => {
+    e.stopPropagation();
     e.preventDefault();
     let validMember = true;
     let errors = {};
+    let ipfsApplicationFileId;
+    let ipfsAcceptanceFileId;
     const bytes16MemberId = web3.utils.fromAscii(this.state.memberID);
 
     //Shortcut for states of this class.
@@ -224,9 +220,9 @@ class NewMember extends Component {
       selectedOccupations,
       acceptanceDate,
       applicationFileName,
-      //applicationFile,
+      applicationFileBuffer,
       acceptanceFileName,
-      //acceptanceFile
+      acceptanceFileBuffer,
     } = this.state;
 
     //Reset the error message to an empty string.
@@ -234,12 +230,13 @@ class NewMember extends Component {
 
     try {
       //FIELD VALIDATION
+
       //Check memberId
       validMember = checkID(memberID);
       if (!validMember) {
         this.memberIDInputRef.focus();
         errors["memberID"] = "Por favor, introduce una identificación válida (NIF/NIE).";
-        this.setState({ errorMessages : errors });
+        this.setState({ errorMessages: errors });
       } else {
         //Check that we don't have the same ID in the cooperative.
         const existingMember = await factory.methods
@@ -249,7 +246,8 @@ class NewMember extends Component {
         if (existingMember) {
           validMember = false;
           this.memberIDInputRef.focus();
-          errors["memberID"] = "Ya existe una persona socia con la misma identificación.";
+          errors["memberID"] =
+            "Ya existe una persona socia con la misma identificación.";
           this.setState({ errorMessages: errors });
         }
       }
@@ -259,7 +257,8 @@ class NewMember extends Component {
         validMember = checkTextField(name);
         if (!validMember) {
           this.nameInputRef.focus();
-          errors["name"] = "Por favor, introduce el nombre del nuevo/a socio/a.";
+          errors["name"] =
+            "Por favor, introduce el nombre del nuevo/a socio/a.";
           this.setState({ errorMessages: errors });
         }
       }
@@ -269,7 +268,8 @@ class NewMember extends Component {
         validMember = checkTextField(surname);
         if (!validMember) {
           this.surnameInputRef.focus();
-          errors["surname"] = "Por favor, introduce los apellidos del nuevo/a socio/a.";
+          errors["surname"] =
+            "Por favor, introduce los apellidos del nuevo/a socio/a.";
           this.setState({ errorMessages: errors });
         }
       }
@@ -279,13 +279,15 @@ class NewMember extends Component {
         validMember = checkDateField(birthdate);
         if (!validMember) {
           this.birthdateInputRef.focus();
-          errors["birthdate"] = "Por favor, introduce una fecha de nacimiento válida de acuerdo al formato dd/mm/aaaa.";
+          errors["birthdate"] =
+            "Por favor, introduce una fecha de nacimiento válida de acuerdo al formato dd/mm/aaaa.";
           this.setState({ errorMessages: errors });
         } else {
           validMember = greaterThanCurrentDate(birthdate);
           if (!validMember) {
             this.birthdateInputRef.focus();
-            errors["birthdate"] = "La fecha de nacimiento no puede ser posterior a la fecha actual.";
+            errors["birthdate"] =
+              "La fecha de nacimiento no puede ser posterior a la fecha actual.";
             this.setState({ errorMessages: errors });
           }
         }
@@ -296,7 +298,8 @@ class NewMember extends Component {
         validMember = checkTextField(county);
         if (!validMember) {
           this.countyInputRef.focus();
-          errors["county"] = "Por favor, selecciona la provincia de residencia del nuevo/a socio/a.";
+          errors["county"] =
+            "Por favor, selecciona la provincia de residencia del nuevo/a socio/a.";
           this.setState({ errorMessages: errors });
         }
       }
@@ -306,7 +309,8 @@ class NewMember extends Component {
         validMember = checkTextField(office);
         if (!validMember) {
           this.officeInputRef.focus();
-          errors["office"] = "Por favor, selecciona la delegación a la que pertenece el nuevo/a socio/a.";
+          errors["office"] =
+            "Por favor, selecciona la delegación a la que pertenece el nuevo/a socio/a.";
           this.setState({ errorMessages: errors });
         }
       }
@@ -326,7 +330,8 @@ class NewMember extends Component {
         validMember = checkListField(selectedOccupations);
         if (!validMember) {
           this.occupationsInputRef.focus();
-          errors["occupations"] = "Por favor, selecciona la profesión(es) del nuevo/a socio/a.";
+          errors["occupations"] =
+            "Por favor, selecciona la profesión(es) del nuevo/a socio/a.";
           this.setState({ errorMessages: errors });
         }
       }
@@ -336,13 +341,15 @@ class NewMember extends Component {
         validMember = checkDateField(acceptanceDate);
         if (!validMember) {
           this.acceptanceDateInputRef.focus();
-          errors["acceptanceDate"] = "Por favor, introduce una fecha de aceptación válida de acuerdo al formato dd/mm/aaaa.";
+          errors["acceptanceDate"] =
+            "Por favor, introduce una fecha de aceptación válida de acuerdo al formato dd/mm/aaaa.";
           this.setState({ errorMessages: errors });
         } else {
           validMember = greaterThanCurrentDate(acceptanceDate);
           if (!validMember) {
             this.acceptanceDateInputRef.focus();
-            errors["acceptanceDate"] = "La fecha de aceptación no puede ser posterior a la fecha actual.";
+            errors["acceptanceDate"] =
+              "La fecha de aceptación no puede ser posterior a la fecha actual.";
             this.setState({ errorMessages: errors });
           }
         }
@@ -353,7 +360,8 @@ class NewMember extends Component {
         validMember = applicationFileName !== "";
         if (!validMember) {
           this.applicationFileNameInputRef.focus();
-          errors["applicationFileName"] = "Por favor, selecciona el fichero de solicitud asociado al alta del nuevo/a socio/a.";
+          errors["applicationFileName"] =
+            "Por favor, selecciona el fichero de solicitud asociado al alta del nuevo/a socio/a.";
           this.setState({ errorMessages: errors });
         }
       }
@@ -363,7 +371,8 @@ class NewMember extends Component {
         validMember = acceptanceFileName !== "";
         if (!validMember) {
           this.acceptanceFileNameInputRef.focus();
-          errors["acceptanceFileName"] = "Por favor, selecciona el fichero de aceptación del nuevo/a socio/a.";
+          errors["acceptanceFileName"] =
+            "Por favor, selecciona el fichero de aceptación del nuevo/a socio/a.";
           this.setState({ errorMessages: errors });
         }
       }
@@ -410,13 +419,38 @@ class NewMember extends Component {
               bytes16MemberCountry,
             ];
 
-            // TODO: Add the functionality to store the files in IPFS.
-            //TESTING: We will have the hashes from IPFS for each file.
-            const applicationFileId =
-              "AnPs55rrWMXcRVuK8HqCcXABCSPn6HDrd9ngjEzMTKdDtD";
-            const acceptanceFileId =
-              "QmNs55rrWMXcRVuK8HqCcXCHLSPn6HDrd9ngjEzMTKdDtX";
-
+            // Save the application file and the acceptance file in IPFS.
+            //IPFS HASH SAMPLE: "AnPs55rrWMXcRVuK8HqCcXABCSPn6HDrd9ngjEzMTKdDtD".
+            //console.log("Application filename: ", applicationFileName, "Application file buffer:", applicationFileBuffer);
+            //console.log("Acceptance filename: ", acceptanceFileName, "Acceptance file buffer:", acceptanceFileBuffer);
+            //APPLICATION FILE
+            await ipfs
+              .add(applicationFileBuffer)
+              .then((response) => {
+                console.log("Application file response: ", response);
+                ipfsApplicationFileId = response.path; //response.cid.string is another option to get the hash.
+                console.log("Application file hash id: ", ipfsApplicationFileId);
+              })
+              .catch((err) => {
+                console.error(err);
+                errors["general"] = "ERROR EN ALMACENAMIENTO IPFS - Fichero de solicitud: " + err;
+                this.setState({ loading: false, errorMessages: errors });
+              });
+      
+            //ACCEPTANCE FILE
+            await ipfs
+              .add(acceptanceFileBuffer)
+              .then((response) => {
+                console.log("Acceptance file response: ", response);
+                ipfsAcceptanceFileId = response.path; //response.cid.string is another option to get the hash.
+                console.log("Acceptance file hash id: ", ipfsAcceptanceFileId);
+              })
+              .catch((err) => {
+                console.error(err);
+                errors["general"] = "ERROR EN ALMACENAMIENTO IPFS - Certificado de aceptación: " + err;
+                this.setState({ loading: false, errorMessages: errors });
+              });
+      
             //Get the current account.
             const currentAccount = getCurrentAccount();
             await factory.methods
@@ -428,8 +462,8 @@ class NewMember extends Component {
                 this.state.email,
                 bytes16MemberLocation,
                 bytes16Occupations,
-                applicationFileId,
-                acceptanceFileId
+                ipfsApplicationFileId,
+                ipfsAcceptanceFileId
               )
               .send({
                 from: currentAccount,
@@ -462,9 +496,10 @@ class NewMember extends Component {
                   currentOccupation: "occ00000",
                   occupationCategoryList: occupations,
                   applicationFileName: "",
-                  //applicationFile: null,
+                  applicationFileBuffer: "",
                   acceptanceFileName: "",
-                  //acceptanceFile: null
+                  acceptanceFileBuffer: "",
+                  acceptanceFileId: ""
                 });
               } else {
                 //Return to the main page.
@@ -508,7 +543,9 @@ class NewMember extends Component {
               onKeyPress={(e) => {
                 e.key === "Enter" && e.preventDefault();
               }}
-              ref={input => { this.memberIDInputRef = input; }}
+              ref={(input) => {
+                this.memberIDInputRef = input;
+              }}
             />
             <Message error content={this.state.errorMessages.memberID} />
           </Form.Field>
@@ -525,7 +562,9 @@ class NewMember extends Component {
                 onKeyPress={(e) => {
                   e.key === "Enter" && e.preventDefault();
                 }}
-                ref={input => { this.nameInputRef = input; }}
+                ref={(input) => {
+                  this.nameInputRef = input;
+                }}
               />
               <Message error content={this.state.errorMessages.name} />
             </Form.Field>
@@ -541,7 +580,9 @@ class NewMember extends Component {
                   e.key === "Enter" && e.preventDefault();
                 }}
                 style={{ width: 500 }}
-                ref={input => { this.surnameInputRef = input; }}
+                ref={(input) => {
+                  this.surnameInputRef = input;
+                }}
               />
               <Message error content={this.state.errorMessages.surname} />
             </Form.Field>
@@ -559,7 +600,9 @@ class NewMember extends Component {
                 onKeyPress={(e) => {
                   e.key === "Enter" && e.preventDefault();
                 }}
-                ref={input => { this.birthdateInputRef = input; }}
+                ref={(input) => {
+                  this.birthdateInputRef = input;
+                }}
               />
               <Message error content={this.state.errorMessages.birthdate} />
             </Form.Field>
@@ -569,7 +612,9 @@ class NewMember extends Component {
                 value={this.state.county}
                 onChange={this.countySelectHandler}
                 style={{ width: 300 }}
-                ref={input => { this.countyInputRef = input; }}
+                ref={(input) => {
+                  this.countyInputRef = input;
+                }}
               >
                 <option key="selectCounty" value="countySelection">
                   Selecciona una provincia...
@@ -588,7 +633,9 @@ class NewMember extends Component {
                 value={this.state.office}
                 onChange={this.officeSelectHandler}
                 style={{ width: 300 }}
-                ref={input => { this.officeInputRef = input; }}
+                ref={(input) => {
+                  this.officeInputRef = input;
+                }}
               >
                 <option key="selectOffice" value="officeSelection">
                   Selecciona una delegación...
@@ -618,7 +665,9 @@ class NewMember extends Component {
               value={this.state.email}
               onChange={(event) => this.setState({ email: event.target.value })}
               style={{ width: 400 }}
-              ref={input => { this.emailInputRef = input; }}
+              ref={(input) => {
+                this.emailInputRef = input;
+              }}
             >
               <Icon name="at" />
               <input />
@@ -632,7 +681,9 @@ class NewMember extends Component {
                 value={this.state.currentCategory}
                 onChange={this.categorySelectHandler}
                 style={{ width: 300 }}
-                ref={input => { this.occupationsInputRef = input; }}
+                ref={(input) => {
+                  this.occupationsInputRef = input;
+                }}
               >
                 <option key="selectCategory" value="cat00">
                   Selecciona una categoría...
@@ -683,7 +734,9 @@ class NewMember extends Component {
               onKeyPress={(e) => {
                 e.key === "Enter" && e.preventDefault();
               }}
-              ref={input => { this.acceptanceDateInputRef = input; }}
+              ref={(input) => {
+                this.acceptanceDateInputRef = input;
+              }}
             />
             <Message error content={this.state.errorMessages.acceptanceDate} />
           </Form.Field>
@@ -698,7 +751,9 @@ class NewMember extends Component {
                 flexDirection: "row",
                 alignItems: "center",
               }}
-              ref={input => { this.applicationFileNameInputRef = input; }}
+              ref={(input) => {
+                this.applicationFileNameInputRef = input;
+              }}
             >
               <label style={{ marginRight: "50px", width: 180 }}>
                 Fichero de solicitud
@@ -706,12 +761,7 @@ class NewMember extends Component {
               {!!this.state.applicationFileName ? (
                 <>
                   <Image src={srcAttachFileIcon} spaced="right" />
-                  <label
-                    style={{ marginLeft: "2px" }}
-                    onClick={this.onDocumentLoadSuccess(
-                      this.state.applicationFileName
-                    )}
-                  >
+                  <label style={{ marginLeft: "2px" }}>
                     {this.state.applicationFileName}
                   </label>
                   <Image
@@ -729,7 +779,10 @@ class NewMember extends Component {
                 />
               )}
             </div>
-            <Message error content={this.state.errorMessages.applicationFileName} />
+            <Message
+              error
+              content={this.state.errorMessages.applicationFileName}
+            />
           </Form.Field>
           <Form.Field>
             <div
@@ -738,7 +791,9 @@ class NewMember extends Component {
                 flexDirection: "row",
                 alignItems: "center",
               }}
-              ref={input => { this.acceptanceFileNameInputRef = input; }}
+              ref={(input) => {
+                this.acceptanceFileNameInputRef = input;
+              }}
             >
               <label style={{ marginRight: "50px", width: 180 }}>
                 Certificado de aceptación
@@ -763,7 +818,10 @@ class NewMember extends Component {
                 />
               )}
             </div>
-            <Message error content={this.state.errorMessages.acceptanceFileName} />
+            <Message
+              error
+              content={this.state.errorMessages.acceptanceFileName}
+            />
           </Form.Field>
           <Message error content={this.state.errorMessages.general} />
           <div className={styles.newMemberButtonSection}>
