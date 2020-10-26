@@ -109,3 +109,17 @@ export function checkListField(fieldValue){
     }
 
 }
+
+export function checkFileExtension(extensionValue){
+    //Check that the file extension is "pdf".
+    //console.log ("File extension: ", extensionValue);
+    if (typeof extensionValue !== undefined && extensionValue !== ''){
+        if (extensionValue === "pdf"){
+            return true;
+        }else {
+            return false;
+        }
+    } else {
+        return false;
+    }
+}

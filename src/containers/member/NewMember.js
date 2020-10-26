@@ -9,7 +9,8 @@ import {
   checkID,
   checkDateField,
   greaterThanCurrentDate,
-  checkListField
+  checkListField, 
+  checkFileExtension
 } from "../../components/member/MemberValidation";
 import { getWeb3, checkRinkebyNetwork, getCurrentAccount } from "../../contracts/web3";
 import swal from "sweetalert";
@@ -363,6 +364,15 @@ class NewMember extends Component {
           errors["applicationFileName"] =
             "Por favor, selecciona el fichero de solicitud asociado al alta del nuevo/a socio/a.";
           this.setState({ errorMessages: errors });
+        }else {
+          const appfileExtension = applicationFileName.split('.').pop();
+          validMember = checkFileExtension(appfileExtension);
+          if (!validMember) {
+            this.applicationFileNameInputRef.focus();
+            errors["applicationFileName"] =
+              "Solamente se admiten ficheros de solicitud de tipo pdf (extensión .pdf)).";
+            this.setState({ errorMessages: errors })  
+          }
         }
       }
 
@@ -374,6 +384,15 @@ class NewMember extends Component {
           errors["acceptanceFileName"] =
             "Por favor, selecciona el fichero de aceptación del nuevo/a socio/a.";
           this.setState({ errorMessages: errors });
+        }else {
+          const accfileExtension = acceptanceFileName.split('.').pop();
+          validMember = checkFileExtension(accfileExtension);
+          if (!validMember) {
+            this.acceptanceFileNameInputRef.focus();
+            errors["acceptanceFileName"] =
+              "Solamente se admiten certificados de aceptación de tipo pdf (extensión .pdf)).";
+            this.setState({ errorMessages: errors })  
+          }
         }
       }
 
