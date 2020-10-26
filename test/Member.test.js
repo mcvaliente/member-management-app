@@ -104,7 +104,7 @@ describe("Members", () => {
       for (var i = 0; i < jsonOutput.length; i++) {
         console.log("Name: ", jsonOutput[i]["2"]);
       }
-      assert.deepStrictEqual(jsonOutput[0]["2"], "Sofía");
+      assert.strictEqual(jsonOutput[0]["2"], "Sofía");  //Ver url: https://nodejs.org/api/assert.html#assert_assert_equal_actual_expected_message
     } catch (err) {
       console.log("Catched exception: ", err);
       assert.ok(err);
@@ -120,7 +120,7 @@ describe("Members", () => {
       for (var i = 0; i < memberOccupations.length; i++) {
         console.log("Occupation (", i, "): ", web3.utils.toAscii(memberOccupations[i]).replace(/\u0000/g, ""));
       }
-      assert.deepStrictEqual(web3.utils.toAscii(memberOccupations[0]).replace(/\u0000/g, ""), "Actor/Actriz");
+      assert.strictEqual(web3.utils.toAscii(memberOccupations[0]).replace(/\u0000/g, ""), "Actor/Actriz");
     } catch (err) {
       console.log("Catched exception: ", err);
       assert.ok(err);
@@ -140,7 +140,7 @@ describe("Members", () => {
         console.log("County: ", web3.utils.toAscii(jsonOutput[i]["1"]).replace(/\u0000/g, ""));
         console.log("Country: ", web3.utils.toAscii(jsonOutput[i]["2"]).replace(/\u0000/g, ""));
       }
-      assert.deepStrictEqual(web3.utils.toAscii(jsonOutput[0]["0"]).replace(/\u0000/g, ""), "Barcelona");
+      assert.strictEqual(web3.utils.toAscii(jsonOutput[0]["0"]).replace(/\u0000/g, ""), "Barcelona");
     } catch (err) {
       console.log("Catched exception: ", err);
       assert.ok(err);
@@ -159,7 +159,7 @@ describe("Members", () => {
         console.log("Application file id: ", jsonOutput[i]["0"]);
         console.log("Acceptance file id: ", jsonOutput[i]["1"]);
       }
-      assert.deepStrictEqual(jsonOutput[0]["0"], "AnPs55rrWMXcRVuK8HqCcXABCSPn6HDrd9ngjEzMTKdDtD");
+      assert.strictEqual(jsonOutput[0]["0"], "AnPs55rrWMXcRVuK8HqCcXABCSPn6HDrd9ngjEzMTKdDtD");
     } catch (err) {
       console.log("Catched exception: ", err);
       assert.ok(err);
