@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { NavLink, useParams, Redirect } from "react-router-dom";
-import { Divider, Form, Input, Message, Icon } from "semantic-ui-react";
+import { Divider, Form, Input, Message, Icon, Image } from "semantic-ui-react";
 import styles from "../../assets/css/MemberInfo.module.css";
 import {
   counties,
@@ -56,6 +56,8 @@ const MemberInfo = (props) => {
   const inputEmailRef = useRef();
   const inputAcceptanceDateRef = useRef();
   const inputCategoriesRef = useRef();
+
+  const srcAttachFileIcon = "/images/attach-file-icon.svg";
 
   //useEffect executes only when the memberID state changes.
   useEffect(() => {
@@ -727,24 +729,18 @@ const MemberInfo = (props) => {
           />
           <Message error content={errorMessages.acceptanceDate} />
         </Form.Field>
-        {/*TODO: Add the files stored in IPFS. They only can be downloaded but not modified.*/}
+        {/*Add the files stored in IPFS. They only can be displayed and downloaded but not modified.*/}
         <Form.Field>
-          <label>Fichero de solicitud</label>
-          {/*The application file cannot be updated. Only downloaded: TODO.*/}
-          <input
-            value={applicationFileId}
-            style={{ width: 425, background: "#E3E6E7" }}
-            disabled
-          />
+          <label>Archivos adjuntos</label>        
         </Form.Field>
         <Form.Field>
-          <label>Certificado de aceptación</label>
-          {/*The acceptance file cannot be updated. Only downloaded: TODO.*/}
-          <input
-            value={acceptanceFileId}
-            style={{ width: 425, background: "#E3E6E7" }}
-            disabled
-          />
+          <Image style= {{verticalAlign:'top'}} src={srcAttachFileIcon} spaced="right" />
+          {/* Equivalent to: href={'https://ipfs.io/ipfs/' + applicationFileId} but it is better with ES6 syntax */}
+          <a style={{ marginLeft: "2px", color:'#56595A', verticalAlign:'middle' }} rel="noopener noreferrer" href={`https://ipfs.io/ipfs/${applicationFileId}`} target='_blank'>Fichero de solicitud</a>
+        </Form.Field>
+        <Form.Field>
+          <Image style= {{verticalAlign:'top'}} src={srcAttachFileIcon} spaced="right" />
+          <a style={{ marginLeft: "2px", color:'#56595A', verticalAlign:'middle' }} rel="noopener noreferrer" href={`https://ipfs.io/ipfs/${acceptanceFileId}`} target='_blank'>Certificado de aceptación</a>
         </Form.Field>
 
         <Message error content={errorMessages.general} />
