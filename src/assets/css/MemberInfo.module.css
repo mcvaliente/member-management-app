@@ -41,3 +41,10 @@
     margin: 20px auto;
 }
 
+.fileLinkDisabled{
+    cursor: not-allowed;
+    display: inline-block;
+    opacity: 0.5;
+    text-decoration: none;
+    pointer-events: none;
+}

@@ -736,11 +736,11 @@ const MemberInfo = (props) => {
         <Form.Field>
           <Image style= {{verticalAlign:'top'}} src={srcAttachFileIcon} spaced="right" />
           {/* Equivalent to: href={'https://ipfs.io/ipfs/' + applicationFileId} but it is better with ES6 syntax */}
-          <a style={{ marginLeft: "2px", color:'#56595A', verticalAlign:'middle' }} rel="noopener noreferrer" href={`https://ipfs.io/ipfs/${applicationFileId}`} target='_blank'>Fichero de solicitud</a>
+          <a style={{ marginLeft: "2px", color:'#56595A', verticalAlign:'middle' }} rel="noopener noreferrer" href={`https://ipfs.io/ipfs/${applicationFileId}`} target='_blank' className={ editMode ? styles.fileLinkDisabled : ''}>Fichero de solicitud</a>
         </Form.Field>
         <Form.Field>
           <Image style= {{verticalAlign:'top'}} src={srcAttachFileIcon} spaced="right" />
-          <a style={{ marginLeft: "2px", color:'#56595A', verticalAlign:'middle' }} rel="noopener noreferrer" href={`https://ipfs.io/ipfs/${acceptanceFileId}`} target='_blank'>Certificado de aceptación</a>
+          <a style={{ marginLeft: "2px", color:'#56595A', verticalAlign:'middle' }} rel="noopener noreferrer" href={`https://ipfs.io/ipfs/${acceptanceFileId}` } target='_blank' className={ editMode ? styles.fileLinkDisabled : ''}>Certificado de aceptación</a>
         </Form.Field>
 
         <Message error content={errorMessages.general} />
