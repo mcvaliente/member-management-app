@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Form, Input, Message, Icon, Image } from "semantic-ui-react";
+import { Form, Input, Message, Icon, Image, Segment } from "semantic-ui-react";
 import { NavLink, Redirect } from "react-router-dom";
 import styles from "../../assets/css/NewMember.module.css";
 import { counties, offices, occupationCategories, occupations } from "../../utils/dappconfig";
@@ -762,13 +762,12 @@ class NewMember extends Component {
           <Form.Field>
             <label>Adjuntar archivos</label>
           </Form.Field>
-          {/*TODO: Add the files to store in IPFS.*/}
           <Form.Field>
             <div
               style={{
                 display: "flex",
                 flexDirection: "row",
-                alignItems: "center",
+                alignItems: "center"
               }}
               ref={(input) => {
                 this.applicationFileNameInputRef = input;
@@ -779,16 +778,18 @@ class NewMember extends Component {
               </label>
               {!!this.state.applicationFileName ? (
                 <>
-                  <Image src={srcAttachFileIcon} spaced="right" />
-                  <label style={{ marginLeft: "2px" }}>
-                    {this.state.applicationFileName}
-                  </label>
-                  <Image
-                    key="btnDeleteApplicationFile"
-                    src={srcDeleteIcon}
-                    onClick={this.deleteApplicationFileClickHandler}
-                    style={{ cursor: "pointer", marginLeft: "20px" }}
-                  />
+                  <Segment>
+                    <Image src={srcAttachFileIcon} spaced="right" />
+                    <label style={{ textOverflow: "ellipsis", overflow: "hidden", maxWidth: 250, display: "inline-block", whiteSpace: "nowrap", verticalAlign: "middle" }}>
+                      {this.state.applicationFileName}
+                    </label>
+                    <Image
+                      key="btnDeleteApplicationFile"
+                      src={srcDeleteIcon}
+                      onClick={this.deleteApplicationFileClickHandler}
+                      style={{ cursor: "pointer", marginLeft: "20px", display:"inline" }}
+                    />
+                  </Segment>
                 </>
               ) : (
                 //The filename of the application file is empty. The user has to load it.
@@ -819,16 +820,18 @@ class NewMember extends Component {
               </label>
               {!!this.state.acceptanceFileName ? (
                 <>
-                  <Image src={srcAttachFileIcon} spaced="right" />
-                  <label style={{ marginLeft: "2px" }}>
-                    {this.state.acceptanceFileName}
-                  </label>
-                  <Image
-                    key="btnDeleteAcceptanceFile"
-                    src={srcDeleteIcon}
-                    onClick={this.deleteAcceptanceFileClickHandler}
-                    style={{ cursor: "pointer", marginLeft: "20px" }}
-                  />
+                  <Segment>
+                    <Image src={srcAttachFileIcon} spaced="right" />
+                    <label style={{ textOverflow: "ellipsis", overflow: "hidden", maxWidth: 250, display: "inline-block", whiteSpace: "nowrap", verticalAlign: "middle" }}>
+                      {this.state.acceptanceFileName}
+                    </label>
+                    <Image
+                      key="btnDeleteAcceptanceFile"
+                      src={srcDeleteIcon}
+                      onClick={this.deleteAcceptanceFileClickHandler}
+                      style={{ cursor: "pointer", marginLeft: "20px", display:"inline" }}
+                    />
+                  </Segment>
                 </>
               ) : (
                 <FileUploader
