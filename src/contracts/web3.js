@@ -4,10 +4,8 @@ let web3;
 
 export function checkMetaMask() {
   if (typeof window.ethereum !== "undefined" && window.ethereum.isMetaMask) {
-    console.log("MetaMask is installed.");
     return true;
   } else {
-    console.log("ERROR - MetaMask is not installed.");
     return false;
   }
 }
@@ -35,9 +33,7 @@ export async function checkRinkebyNetwork() {
         console.log("MetaMask is connected to the Ethereum Rinkeby Test Network.");
         return true;
       } else {
-        console.log(
-          "ERROR - MetaMask is not connected to the Ethereum Rinkeby Test Network."
-        );
+        console.log("ERROR - MetaMask is not connected to the Ethereum Rinkeby Test Network. Please, connect your MetaMask account to the Rinkeby network!");
         return false;
       }
     }
