@@ -24,8 +24,23 @@ function App() {
 
   useEffect(() => {
     //async function inside useEffect since we cannot declare useEffect as "async".
-    async function checkNetwork(validWallet) {
-      if (validWallet) {
+    async function checkWallet(){
+      const validWallet = checkMetaMask();
+      setIsMetaMaskInstalled(validWallet);
+      //If MetaMask is installed we have to check if the user it is connected to our application yet
+      //using the Rinkeby Test Network.
+      if (validWallet){
+        console.log("MetaMask is installed.");
+        await checkNetwork();
+      }else {
+        //If MetaMask is not installed we have to show the corresponding section
+        //and disable the MetaMask connection button.
+        console.log("ERROR - MetaMask is not installed. Please, install MetaMask!");
+        setIsRinkebyNetwork(false);
+      }
+    }
+
+    async function checkNetwork() {
         const validNetwork = await checkRinkebyNetwork();
         console.log("Valid network : ", validNetwork);
         setIsRinkebyNetwork(validNetwork);
@@ -34,19 +49,11 @@ function App() {
         window.ethereum.on("chainChanged", (_chainId) =>
           window.location.reload()
         );
-      }else {
-        setIsRinkebyNetwork(false);
-      }
     }
 
     //Check if MetaMask is installed.
-    const validWallet = checkMetaMask();
-    //If MetaMask is not installed we have to show the corresponding section
-    //and disable the MetaMask connection button.
-    setIsMetaMaskInstalled(validWallet);
-    //If MetaMask is installed we have to check if the user it is connected to our application yet
-    //using the Rinkeby Test Network.
-    checkNetwork(validWallet)
+    checkWallet();
+
   }, []);
 
   const metaMaskConnectionHandler = async () => {
