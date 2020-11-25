@@ -10,9 +10,9 @@
 /test
 
 #contract deployment files
-compile.js
-deploy.js
-ADDRESS
+.compile.js
+.deploy.js
+.ADDRESS
 
 # production
 /build
