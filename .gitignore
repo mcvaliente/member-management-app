@@ -4,6 +4,8 @@
 compile.js
 deploy.js
 ADDRESS
+/scr/contracts/factory.js
+
 
 # dependencies
 /node_modules
@@ -17,6 +19,7 @@ ADDRESS
 
 # production
 /build
+/src/contracts/build
 
 # misc
 .DS_Store
