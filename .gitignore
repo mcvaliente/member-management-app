@@ -7,6 +7,12 @@
 
 # testing
 /coverage
+/test
+
+#contract deployment files
+compile.js
+deploy.js
+ADDRESS
 
 # production
 /build
