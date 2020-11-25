@@ -1,7 +1,6 @@
 const path = require('path');
 const solc = require('solc');
-const fs = require ('fs-extra'); //similar to fs module but it has a couple of extra functions (removeSync and ensureDirSync).
-
+const fs = require ('fs-extra'); 
 const buildPath = path.resolve(__dirname, 'src/contracts/build');
 fs.removeSync(buildPath);
 
@@ -23,11 +22,10 @@ var input = {
         }
     }
 }; 
-console.log(JSON.parse(solc.compile(JSON.stringify(input))));
-//The previous instruction is equivalent to:
-//const output = JSON.parse(solc.compile(JSON.stringify(input)), 1);
+
+//console.log(JSON.parse(solc.compile(JSON.stringify(input))));
 const output = JSON.parse(solc.compile(JSON.stringify(input)), 1).contracts['Member.sol'];
-console.log('Output: ' + output);
+//console.log('Output: ' + output);
 
 //create the build folder. First, check if it exists.
 fs.ensureDirSync(buildPath);
