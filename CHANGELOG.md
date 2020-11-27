@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/). 
 
 ## [v0.0.1]
-### Date 27/11/2020
+### Date 2020/11/27
 ### Added
 * DEV URL: https://smart-app-dev.p2pmodels.eu/
 * MetaMask wallet: User Installation Guide (pdf).
