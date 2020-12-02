@@ -5,6 +5,7 @@ compile.js
 deploy.js
 ADDRESS
 /src/contracts/factory.js
+.env
 
 
 # dependencies
