@@ -3,7 +3,15 @@ import Web3 from "web3";
 let web3;
 
 export function checkMetaMask() {
+  //Check if the browser is running MetaMask and differentiate MetaMask from other 
+  //ethereum-compatible browsers.
+  //Ref: https://docs.metamask.io/guide/getting-started.html#basic-considerations
+  //If true => MetaMask is installed.
   if (typeof window.ethereum !== "undefined" && window.ethereum.isMetaMask) {
+    //Network version = undefined if we haven't started MetaMask. 4 for Rinkeby.
+    //Selected address = null if we haven't started MetaMask. 
+    //console.log("Network version: ", window.ethereum.networkVersion);
+    //console.log("Ethereum selected address: ", window.ethereum.selectedAddress);
     return true;
   } else {
     return false;
@@ -15,6 +23,9 @@ export async function enableMetaMask() {
     //MetaMask is installed.
     //Launch the plugin:
     await window.ethereum.request({ method: "eth_requestAccounts" });
+    //Network version: 4 (Rinkeby).
+    console.log("Network version: ", window.ethereum.networkVersion);
+    console.log("Ethereum selected address: ", window.ethereum.selectedAddress);
     console.log("MetaMask is connected to the application.");
     return true;
   } else {
