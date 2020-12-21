@@ -207,7 +207,8 @@ class NewMember extends Component {
     let errors = {};
     let ipfsApplicationFileId;
     let ipfsAcceptanceFileId;
-    const bytes16MemberId = web3.utils.fromAscii(this.state.memberID);
+    //We store the member id in capital letters.
+    const bytes16MemberId = web3.utils.fromAscii(this.state.memberID.toUpperCase());
 
     //Shortcut for states of this class.
     const {
@@ -413,13 +414,8 @@ class NewMember extends Component {
             //We have to check if web3 has a value.
             //Create the new member indicating the creator of this member.
             const bytes16Birthdate = web3.utils.fromAscii(this.state.birthdate);
-            const bytes16AcceptanceDate = web3.utils.fromAscii(
-              this.state.acceptanceDate
-            );
-            const bytes16MemberDates = [
-              bytes16Birthdate,
-              bytes16AcceptanceDate,
-            ];
+            const bytes16AcceptanceDate = web3.utils.fromAscii(this.state.acceptanceDate);
+            const bytes16MemberDates = [bytes16Birthdate, bytes16AcceptanceDate];
 
             //Save the id of the occupation not the name.
             const bytes16Occupations = this.state.selectedOccupations.map(
@@ -429,14 +425,8 @@ class NewMember extends Component {
             );
             const bytes16MemberOffice = web3.utils.fromAscii(this.state.office);
             const bytes16MemberCounty = web3.utils.fromAscii(this.state.county);
-            const bytes16MemberCountry = web3.utils.fromAscii(
-              this.state.country
-            );
-            const bytes16MemberLocation = [
-              bytes16MemberOffice,
-              bytes16MemberCounty,
-              bytes16MemberCountry,
-            ];
+            const bytes16MemberCountry = web3.utils.fromAscii(this.state.country);
+            const bytes16MemberLocation = [bytes16MemberOffice, bytes16MemberCounty, bytes16MemberCountry];
 
             // Save the application file and the acceptance file in IPFS.
             //IPFS HASH SAMPLE: "AnPs55rrWMXcRVuK8HqCcXABCSPn6HDrd9ngjEzMTKdDtD".

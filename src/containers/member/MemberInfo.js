@@ -28,7 +28,8 @@ const MemberInfo = (props) => {
 
   const [name, setName] = useState("");
   const [surname, setSurname] = useState("");
-  const [memberID, setMemberID] = useState(id);
+  //We store the member id in capital letters.
+  const [memberID, setMemberID] = useState(id.toUpperCase());
   const [birthdate, setBirthdate] = useState("");
   const [county, setCounty] = useState("");
   const [office, setOffice] = useState("");
@@ -273,7 +274,8 @@ const MemberInfo = (props) => {
 
   const memberSearchHandler = (memberId) => {
     console.log("New member id to search: ", memberId);
-    setMemberID(memberId);
+    //We store the member id in capital letters.
+    setMemberID(memberId.toUpperCase());
   };
 
   const onSubmit = (e) => {

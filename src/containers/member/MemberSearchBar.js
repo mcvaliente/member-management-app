@@ -40,10 +40,11 @@ const MemberSearchBar = (props) => {
         } else {
           const isRinkeby = checkRinkebyNetwork();
           if (isRinkeby) {
-            //Check that we don't have the same ID in the cooperative.
-            const bytes32MemberId = web3.utils.fromAscii(memberId);
+            //Check if we have the ID in the cooperative. Convert to uppercase since 
+            //the member id is stored in capital letters.
+            const bytes16MemberId = web3.utils.fromAscii(memberId.toUpperCase());
             const existingMember = await factory.methods
-              .memberExists(bytes32MemberId)
+              .memberExists(bytes16MemberId)
               .call();
             console.log("Search - Existing member: ", existingMember);
             setLoading(false);
