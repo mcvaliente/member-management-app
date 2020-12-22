@@ -5,6 +5,7 @@ import swal from "sweetalert";
 
 const MemberSearchBar = (props) => {
   const [loading, setLoading] = useState(false);
+  const [memberValue, setMemberValue] = useState('');
 
   const inputMemberIdRef = useRef();
 
@@ -13,9 +14,18 @@ const MemberSearchBar = (props) => {
   };
 
   const keyPressHandler = (e) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && e.target.value !== '') {
       //Check if we have this member Id in the blockchain.
       memberSearchHandler(e.target.value);
+    }
+  };
+
+  const mouseClickHandler = () => {
+    if (memberValue !== '') {
+      //Check if we have this member Id in the blockchain.
+      memberSearchHandler(memberValue);  
+    }else {
+      inputMemberIdRef.current.focus();
     }
   };
 
@@ -110,8 +120,9 @@ const MemberSearchBar = (props) => {
         disabled={!props.metaMaskConnected}
         onKeyPress={keyPressHandler}
         ref={inputMemberIdRef}
+        onChange={(event) => setMemberValue(event.target.value)}
       />
-      <i aria-hidden="true" className="search icon"></i>
+      <i aria-hidden="true" className="search icon" onClick={mouseClickHandler}></i>
     </div>
   );
 };

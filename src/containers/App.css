@@ -63,6 +63,15 @@ p {
   position: absolute;
 }
 
+
+/**************************************/
+/**Customize member search bar style**/
+/************************************/
+.ui.icon.input>i.icon {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
 /***********************************/
 /**Customize Swal buttons style**/
 /********************************/
