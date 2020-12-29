@@ -15,3 +15,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 	- Expel member.
 	- Search for another member.
 * Pending validation: occupations and categories associated with member's jobs.
+
+## [v0.0.2]
+### Date 2020/12/29
+### Changed
+* Issue #6: Find a member by clicking.
+* Issue #8: Change the name of the app in the browser tab.
+
+### Fixed
+* Issue #5: The "Aceptar" button is displayed partially when adding a member.
+* Issue #7: Case-insensitive when searching for a member.
