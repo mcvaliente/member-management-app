@@ -71,54 +71,56 @@ function App() {
   };
 
   return (
-    <Layout
-      disabled={!isMetaMaskInstalled || !isRinkebyNetwork}
-      connected={isMetaMaskConnected}
-      clicked={metaMaskConnectionHandler}
-    >
-      {errorMessage ? (
-        <Message
-          error
-          header="Error en conexión con MetaMask"
-          content={errorMessage}
-        />
-      ) : null}
-      <Switch>
-        {" "}
-        {/* The Switch decides which component to show based on the current URL.*/}
-        <Route
-          exact
-          path="/"
-          component={() => (
-            <Home
-              metaMaskInstalled={isMetaMaskInstalled}
-              rinkebyNetwork={isRinkebyNetwork}
-              metaMaskConnected={isMetaMaskConnected}
-            />
-          )}
-        ></Route>
-        {/*<Route exact path='/addmember' component={NewMember}></Route>*/}
-        <Route
-          exact
-          path="/addmember"
-          component={() => (
-            <NewMember metaMaskConnected={isMetaMaskConnected} />
-          )}
-        ></Route>
-        <Route
-          exact
-          path="/member/:id"
-          component={() => (
-            <MemberInfo metaMaskConnected={isMetaMaskConnected} />
-          )}
-        />
-        {/* Redirect user to a specific page if the route does not exist. */}
-        <Route component={NotFound} />
-      </Switch>
-      {/*Redirect to the main page if the MetaMask connection button is disabled */}
-      {!isMetaMaskInstalled || !isRinkebyNetwork ? <Redirect to="/" /> : null}
-      {loading ? <Loader></Loader> : null}
-    </Layout>
+    <div className="App">
+      <Layout
+        disabled={!isMetaMaskInstalled || !isRinkebyNetwork}
+        connected={isMetaMaskConnected}
+        clicked={metaMaskConnectionHandler}
+      >
+        {errorMessage ? (
+          <Message
+            error
+            header="Error en conexión con MetaMask"
+            content={errorMessage}
+          />
+        ) : null}
+        <Switch>
+          {" "}
+          {/* The Switch decides which component to show based on the current URL.*/}
+          <Route
+            exact
+            path="/"
+            component={() => (
+              <Home
+                metaMaskInstalled={isMetaMaskInstalled}
+                rinkebyNetwork={isRinkebyNetwork}
+                metaMaskConnected={isMetaMaskConnected}
+              />
+            )}
+          ></Route>
+          {/*<Route exact path='/addmember' component={NewMember}></Route>*/}
+          <Route
+            exact
+            path="/addmember"
+            component={() => (
+              <NewMember metaMaskConnected={isMetaMaskConnected} />
+            )}
+          ></Route>
+          <Route
+            exact
+            path="/member/:id"
+            component={() => (
+              <MemberInfo metaMaskConnected={isMetaMaskConnected} />
+            )}
+          />
+          {/* Redirect user to a specific page if the route does not exist. */}
+          <Route component={NotFound} />
+        </Switch>
+        {/*Redirect to the main page if the MetaMask connection button is disabled */}
+        {!isMetaMaskInstalled || !isRinkebyNetwork ? <Redirect to="/" /> : null}
+        {loading ? <Loader></Loader> : null}
+      </Layout>
+    </div>
   );
 }
 

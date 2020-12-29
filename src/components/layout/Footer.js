@@ -17,7 +17,7 @@ export default () => {
                 </a>
                 , 2020. 
             </span>
-            <div style={{ display: "flex", justifyContent: 'center', alignItems: "center"}}>
+            <div className={styles.FooterInnerDiv}>
                 <img src={srcGitHubImg} alt=""/>
                 <a
                     className={styles.FooterLink}

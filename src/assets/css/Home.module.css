@@ -1,9 +1,11 @@
 .Home {
   margin: 20px 20px 20px 200px;
-  padding: 0;
+  padding: 10px 0;
   height: 100%;
   font-family: Lato;
   font-size: 20px;
+  display: flex;
+  flex-direction: column;
 }
 
 .p {

@@ -1,4 +1,5 @@
 .Footer {
+  position: fixed;
   left: 0;
   bottom: 0;
   width: 100%;
@@ -16,5 +17,11 @@
   color: #FFFFFF !important;
   text-decoration: underline;
   cursor: pointer;
+}
+
+.FooterInnerDiv {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
