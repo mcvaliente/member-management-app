@@ -3,8 +3,6 @@
 # User-specific files
 compile.js
 deploy.js
-ADDRESS
-/src/contracts/factory.js
 .env
 
 
