@@ -1,7 +1,50 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.4.22 <0.7.0;
 
-contract MemberFactory {
+/**
+ * A base contract to be inherited by any contract that want to receive relayed transactions
+ * A subclass must use "_msgSender()" instead of "msg.sender"
+ */
+contract BaseRelayRecipient {
+
+    /*
+     * Forwarder singleton we accept calls from
+     */
+    address public trustedForwarder;
+
+    /*
+     * require a function to be called through GSN only
+     */
+    modifier trustedForwarderOnly() {
+        require(msg.sender == address(trustedForwarder), "Function can only be called through the trusted Forwarder.");
+        _;
+    }
+
+    function isTrustedForwarder(address forwarder) public view returns(bool) {
+        return forwarder == trustedForwarder;
+    }
+
+    /**
+     * return the sender of this call.
+     * if the call came through our trusted forwarder, return the original sender.
+     * otherwise, return `msg.sender`.
+     * should be used in the contract anywhere instead of msg.sender
+     */
+    function _msgSender() internal virtual view returns (address payable ret) {
+        if (msg.data.length >= 24 && isTrustedForwarder(msg.sender)) {
+            // At this point we know that the sender is a trusted forwarder,
+            // so we trust that the last bytes of msg.data are the verified sender address.
+            // extract sender address from the end of msg.data
+            assembly {
+                ret := shr(96,calldataload(sub(calldatasize(),20)))
+            }
+        } else {
+            return msg.sender;
+        }
+    }
+}
+
+contract MemberFactory is BaseRelayRecipient {
     struct MemberInfo {
         PersonalInfo personalData; //name, surname, birthdate, email
         LocationInfo memberLocation; //office, county, country
@@ -32,6 +75,10 @@ contract MemberFactory {
     mapping(bytes16 => MemberInfo) members; //NIF/NIE for the identification of a member (bytes16).
     uint32 deployedMembers;
     mapping(bytes16 => bool) activeMembers;
+
+    constructor (address _trustedForwarder) public {
+        trustedForwarder = _trustedForwarder;
+    }
 
     function createMember(
         bytes16 memberId,
