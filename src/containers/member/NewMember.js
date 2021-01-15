@@ -19,6 +19,7 @@ import { Loader } from "../../utils/loader";
 import FileUploader from "../../utils/FileUploader";
 import MemberOccupations from "../../components/member/MemberOccupations";
 import ipfs from "../../storage/ipfs";
+import { submit } from '../../components/ethereum/txs.js';
 
 const srcAttachFileIcon = "/images/attach-file-icon.svg";
 const srcDeleteIcon = "/images/delete-icon.svg";
@@ -50,6 +51,7 @@ class NewMember extends Component {
     loading: false,
     errorMessages: {},
     returnMainPage: false,
+    txHash:""
   };
 
   async componentDidMount() {
@@ -433,53 +435,71 @@ class NewMember extends Component {
             //console.log("Application filename: ", applicationFileName, "Application file buffer:", applicationFileBuffer);
             //console.log("Acceptance filename: ", acceptanceFileName, "Acceptance file buffer:", acceptanceFileBuffer);
             //APPLICATION FILE
-            await ipfs
-              .add(applicationFileBuffer)
-              .then((response) => {
-                console.log("Application file response: ", response);
-                ipfsApplicationFileId = response.path; //response.cid.string is another option to get the hash.
-                console.log("Application file hash id: ", ipfsApplicationFileId);
-              })
-              .catch((err) => {
-                console.error(err);
-                errors["general"] = "ERROR EN ALMACENAMIENTO IPFS - Fichero de solicitud: " + err;
-                this.setState({ loading: false, errorMessages: errors });
-              });
+            //await ipfs
+            //  .add(applicationFileBuffer)
+            //  .then((response) => {
+            //    console.log("Application file response: ", response);
+            //    ipfsApplicationFileId = response.path; //response.cid.string is another option to get the hash.
+            //    console.log("Application file hash id: ", ipfsApplicationFileId);
+            //  })
+            //  .catch((err) => {
+            //    console.error(err);
+            //    errors["general"] = "ERROR EN ALMACENAMIENTO IPFS - Fichero de solicitud: " + err;
+            //    this.setState({ loading: false, errorMessages: errors });
+            //  });
+            ipfsApplicationFileId="Prueba1";
       
             //ACCEPTANCE FILE
-            await ipfs
-              .add(acceptanceFileBuffer)
-              .then((response) => {
-                console.log("Acceptance file response: ", response);
-                ipfsAcceptanceFileId = response.path; //response.cid.string is another option to get the hash.
-                console.log("Acceptance file hash id: ", ipfsAcceptanceFileId);
-              })
-              .catch((err) => {
-                console.error(err);
-                errors["general"] = "ERROR EN ALMACENAMIENTO IPFS - Certificado de aceptación: " + err;
-                this.setState({ loading: false, errorMessages: errors });
-              });
+            //await ipfs
+            //  .add(acceptanceFileBuffer)
+            //  .then((response) => {
+            //    console.log("Acceptance file response: ", response);
+            //    ipfsAcceptanceFileId = response.path; //response.cid.string is another option to get the hash.
+            //    console.log("Acceptance file hash id: ", ipfsAcceptanceFileId);
+            //  })
+            //  .catch((err) => {
+            //    console.error(err);
+            //    errors["general"] = "ERROR EN ALMACENAMIENTO IPFS - Certificado de aceptación: " + err;
+            //    this.setState({ loading: false, errorMessages: errors });
+            //  });
+            ipfsAcceptanceFileId="Prueba2";
       
             //Get the current account.
             const currentAccount = getCurrentAccount();
-            await factory.methods
-              .createMember(
-                bytes16MemberId,
-                bytes16MemberDates,
-                this.state.name,
-                this.state.surname,
-                this.state.email,
-                bytes16MemberLocation,
-                bytes16Occupations,
-                ipfsApplicationFileId,
-                ipfsAcceptanceFileId
-              )
-              .send({
-                from: currentAccount,
-                gas: "2000000",
-              });
-
+            //Instead of executing the createMember method from this account,
+            //we create the meta-transaction in order to send gasless transactions
+            //for the users of the app.
+            //await factory.methods
+            //  .createMember(
+            //    bytes16MemberId,
+            //    bytes16MemberDates,
+            //    this.state.name,
+            //    this.state.surname,
+            //    this.state.email,
+            //    bytes16MemberLocation,
+            //    bytes16Occupations,
+            //    ipfsApplicationFileId,
+            //    ipfsAcceptanceFileId
+            //  )
+            //  .send({
+            //    from: currentAccount,
+            //    gas: "2000000",
+            //  });
+            const tx = await submit(
+                            bytes16MemberId, 
+                            bytes16MemberDates, 
+                            this.state.name, 
+                            this.state.surname,
+                            this.state.email,
+                            bytes16MemberLocation,
+                            bytes16Occupations,
+                            ipfsApplicationFileId,
+                            ipfsAcceptanceFileId,
+                            web3,
+                            currentAccount);
             this.setState({ loading: false, errorMessages: {} });
+            //this.setState({ loading: false, errorMessages: {}, txHash : tx.hash });
+            //console.log("tx result: ", tx);
             swal({
               title: "Has añadido a este socio/a correctamente.",
               text: "¿Qué quieres hacer ahora?",
