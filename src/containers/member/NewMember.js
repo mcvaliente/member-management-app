@@ -497,44 +497,53 @@ class NewMember extends Component {
                             ipfsAcceptanceFileId,
                             web3,
                             currentAccount);
-            this.setState({ loading: false, errorMessages: {} });
-            //this.setState({ loading: false, errorMessages: {}, txHash : tx.hash });
-            //console.log("tx result: ", tx);
-            swal({
-              title: "Has añadido a este socio/a correctamente.",
-              text: "¿Qué quieres hacer ahora?",
-              icon: "success",
-              buttons: ["Volver a la pantalla principal", "Añadir socio/a"],
-            }).then(async (willContinue) => {
-              if (willContinue) {
-                //Add a new member.
-                //Reset the form fields.
-                this.setState({
-                  name: "",
-                  surname: "",
-                  memberID: "",
-                  birthdate: "",
-                  county: "",
-                  office: "",
-                  country: "España",
-                  email: "",
-                  selectedOccupations: [],
-                  acceptanceDate: "",
-                  currentCategory: "cat00",
-                  categoryList: occupationCategories,
-                  currentOccupation: "occ00000",
-                  occupationCategoryList: occupations,
-                  applicationFileName: "",
-                  applicationFileBuffer: "",
-                  acceptanceFileName: "",
-                  acceptanceFileBuffer: "",
-                  acceptanceFileId: ""
-                });
-              } else {
-                //Return to the main page.
-                this.setState({ returnMainPage: true });
-              }
-            });
+            console.log("tx result hash: ", tx.hash);
+            console.log("tx result error: ", tx.error);
+            try {
+              //If the transaction includes an error message there has been a failure.
+              if (tx.error !== ""){
+                throw new Error(tx.error);
+              }  
+              this.setState({ loading: false, txHash: tx.hash, errorMessages: {} });
+              swal({
+                title: "Has añadido a este socio/a correctamente.",
+                text: "¿Qué quieres hacer ahora?",
+                icon: "success",
+                buttons: ["Volver a la pantalla principal", "Añadir socio/a"],
+              }).then(async (willContinue) => {
+                if (willContinue) {
+                  //Add a new member.
+                  //Reset the form fields.
+                  this.setState({
+                    name: "",
+                    surname: "",
+                    memberID: "",
+                    birthdate: "",
+                    county: "",
+                    office: "",
+                    country: "España",
+                    email: "",
+                    selectedOccupations: [],
+                    acceptanceDate: "",
+                    currentCategory: "cat00",
+                    categoryList: occupationCategories,
+                    currentOccupation: "occ00000",
+                    occupationCategoryList: occupations,
+                    applicationFileName: "",
+                    applicationFileBuffer: "",
+                    acceptanceFileName: "",
+                    acceptanceFileBuffer: "",
+                    acceptanceFileId: ""
+                  });
+                } else {
+                  //Return to the main page.
+                  this.setState({ returnMainPage: true });
+                }
+              });
+            } catch (error) {
+              errors["general"] = error.message;
+              this.setState({ loading: false, errorMessages: errors });        
+            }
           }
         });
       }

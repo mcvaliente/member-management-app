@@ -23,9 +23,9 @@ const ForwardRequestType = [
 
 const TypedData = {
   domain: {
-    name: 'Defender',
+    name: 'Wallet manager',
     version: '1',
-    chainId: 4, //Rinkeby
+    chainId: process.env.REACT_APP_CHAIN_ID, //4 - Rinkeby
     verifyingContract: ForwarderAddress,
   },
   primaryType: 'ForwardRequest',
@@ -37,10 +37,9 @@ const TypedData = {
 };
 
 //Reference: https://github.com/OpenZeppelin/defender-example-metatx-relay/blob/7ae0dc38591f3c2210eb696c18360cde4d391703/app/src/eth/txs.js
-export async function submit(memberId, memberDates, name, surname, email, memberLocation, occupations, ipfsApplicationFileId, ipfsAcceptanceFileId, provider, currentAccount) {
+export async function submit(memberId, memberDates, name, surname, email, memberLocation, occupations, ipfsApplicationFileId, ipfsAcceptanceFileId, web3, from) {
   
-  const from = currentAccount;
-  //const network = await provider.eth.net.getId();
+  //const network = await web3.eth.net.getId();
   //e.g. (if selected Rinkeby in our MetaMask account) txs network: 4
   //console.log("txs network: ", network);
 
@@ -51,7 +50,7 @@ export async function submit(memberId, memberDates, name, surname, email, member
   //NOTA: No sé si la dirección debería ser la del contrato del Forwarder y no la de from. Ya se verá
   //cuando termine de implementar la gestión de la transacción (depende de si lanzo una transacción desde
   //el contrato forwarder).
-  const nonce = await provider.eth.getTransactionCount(from, "pending").then(nonce => nonce.toString());
+  const nonce = await web3.eth.getTransactionCount(from, "pending").then(nonce => nonce.toString());
   //console.log("nonce:" , nonce);
 
   // Encode meta-tx request
@@ -77,11 +76,35 @@ export async function submit(memberId, memberDates, name, surname, email, member
   };
 
   // Get the signature
+  let response = {
+    hash: "0x",
+    error: ""
+  };
   const toSign = { ...TypedData, message: request };
-  const signature = await provider.currentProvider.send('eth_signTypedData_v4', [from, JSON.stringify(toSign)]);
-  console.log("Signature: ", signature);
-
-  //Pending: Check that the user doesn't cancel the signature.
+  //const signature = await web3.currentProvider.send('eth_signTypedData_v4', [from, JSON.stringify(toSign)]);
+  //console.log("Signature: ", signature);
+  const params = [from, JSON.stringify(toSign)];
+  await web3.currentProvider
+  .request({
+    method: 'eth_signTypedData_v4',
+    params,
+  })
+  .then((result) => {
+    // The result varies by by RPC method.
+    // For example, this method will return a transaction hash hexadecimal string on success.
+    if (result.error) {
+      response.error = result.error.message;
+    }
+    else {
+      response.error = "Transaction ok";
+      console.log('TYPED SIGNED:' + JSON.stringify(result.result));
+    }
+  })
+  .catch((error) => {
+    // If the request fails, the Promise will reject with an error.
+    response.error = error.message;
+  });
+  return response;
 
   // Send request to the server
   //const response = await fetch(RelayUrl, {
@@ -89,7 +112,4 @@ export async function submit(memberId, memberDates, name, surname, email, member
   //  headers: { 'Content-Type': 'application/json' },
   //  body: JSON.stringify({ ...request, signature })
   //}).then(r => r.json());
-  const response = "Sent meta-transaction.";
-
-  return response;
 }
