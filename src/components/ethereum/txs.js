@@ -26,7 +26,7 @@ const TypedData = {
     name: 'Wallet manager',
     version: '1',
     chainId: process.env.REACT_APP_CHAIN_ID, //4 - Rinkeby
-    verifyingContract: ForwarderAddress,
+    verifyingContract: ForwarderAddress
   },
   primaryType: 'ForwardRequest',
   types: {
@@ -90,19 +90,22 @@ export async function submit(memberId, memberDates, name, surname, email, member
     params,
   })
   .then((result) => {
-    // The result varies by by RPC method.
+    // The result varies by RPC method.
     // For example, this method will return a transaction hash hexadecimal string on success.
-    if (result.error) {
-      response.error = result.error.message;
-    }
-    else {
-      response.error = "Transaction ok";
-      console.log('TYPED SIGNED:' + JSON.stringify(result.result));
-    }
+    response.hash = "Transaction ok";
+    const signature = result;
+    console.log('Signature:' + signature);
   })
   .catch((error) => {
     // If the request fails, the Promise will reject with an error.
-    response.error = error.message;
+    if (error.code === 4001) {
+      //MetaMask Message Signature: User denied message signature
+      response.error = "Por favor, firma la transacción para que la operación se te pueda realizar sin coste alguno."
+    }
+    else {
+      response.error = error.message;
+    }    
+    console.log("Signature failure: ", error.message);
   });
   return response;
 
