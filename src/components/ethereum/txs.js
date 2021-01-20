@@ -53,6 +53,9 @@ export async function submit(memberId, memberDates, name, surname, email, member
   const nonce = await web3.eth.getTransactionCount(from, "pending").then(nonce => nonce.toString());
   //console.log("nonce:" , nonce);
 
+  console.log ("Chain id: ", process.env.REACT_APP_CHAIN_ID);
+  console.log("Member contract address: ", process.env.REACT_APP_FORWARDER_CONTRACT_ADDRESS);
+
   // Encode meta-tx request
   const data = factory.methods.createMember(
       memberId,
@@ -79,11 +82,12 @@ export async function submit(memberId, memberDates, name, surname, email, member
   let response = {
     hash: "0x",
     error: ""
-  };
+  }; 
   const toSign = { ...TypedData, message: request };
   //const signature = await web3.currentProvider.send('eth_signTypedData_v4', [from, JSON.stringify(toSign)]);
   //console.log("Signature: ", signature);
   const params = [from, JSON.stringify(toSign)];
+  let signature;
   await web3.currentProvider
   .request({
     method: 'eth_signTypedData_v4',
@@ -93,7 +97,7 @@ export async function submit(memberId, memberDates, name, surname, email, member
     // The result varies by RPC method.
     // For example, this method will return a transaction hash hexadecimal string on success.
     response.hash = "Transaction ok";
-    const signature = result;
+    signature = result;
     console.log('Signature:' + signature);
   })
   .catch((error) => {
@@ -107,12 +111,15 @@ export async function submit(memberId, memberDates, name, surname, email, member
     }    
     console.log("Signature failure: ", error.message);
   });
-  return response;
 
   // Send request to the server
-  //const response = await fetch(RelayUrl, {
-  //  method: 'POST', 
-  //  headers: { 'Content-Type': 'application/json' },
-  //  body: JSON.stringify({ ...request, signature })
-  //}).then(r => r.json());
+  const responseServer = await fetch(RelayUrl, {
+    method: 'POST', 
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...request, signature })
+  }).then(r => r.json());
+  console.log("Response server: ", JSON.stringify(responseServer));
+
+  return response;
+
 }
