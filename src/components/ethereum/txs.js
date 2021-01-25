@@ -79,15 +79,13 @@ export async function submit(memberId, memberDates, name, surname, email, member
   };
 
   // Get the signature
-  let response = {
-    hash: "0x",
-    error: ""
-  }; 
+  let response;
   const toSign = { ...TypedData, message: request };
   //const signature = await web3.currentProvider.send('eth_signTypedData_v4', [from, JSON.stringify(toSign)]);
   //console.log("Signature: ", signature);
   const params = [from, JSON.stringify(toSign)];
   let signature;
+  let validSignature = true;
   await web3.currentProvider
   .request({
     method: 'eth_signTypedData_v4',
@@ -96,30 +94,36 @@ export async function submit(memberId, memberDates, name, surname, email, member
   .then((result) => {
     // The result varies by RPC method.
     // For example, this method will return a transaction hash hexadecimal string on success.
-    response.hash = "Transaction ok";
     signature = result;
     console.log('Signature:' + signature);
   })
   .catch((error) => {
     // If the request fails, the Promise will reject with an error.
+    validSignature = false;
     if (error.code === 4001) {
       //MetaMask Message Signature: User denied message signature
-      response.error = "Por favor, firma la transacción para que la operación se te pueda realizar sin coste alguno."
+      response = {
+        error : "Por favor, firma la transacción para que la operación se te pueda realizar sin coste alguno."
+      };
     }
     else {
-      response.error = error.message;
+      response = {
+        error : error.message
+      };
     }    
     console.log("Signature failure: ", error.message);
   });
 
-  // Send request to the server
-  const responseServer = await fetch(RelayUrl, {
-    method: 'POST', 
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ...request, signature })
-  }).then(r => r.json());
-  console.log("Response server: ", JSON.stringify(responseServer));
+  if (validSignature){
+    // Send request to the server
+    response = await fetch(RelayUrl, {
+      method: 'POST', 
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...request, signature })
+    }).then(r => r.json());
+    console.log("Response server: ", JSON.stringify(response));
+  }
 
   return response;
-
+  
 }

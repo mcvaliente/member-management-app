@@ -48,6 +48,8 @@ const TypedData = {
 //const SuffixData = '0x';
 
 async function relay(request) {
+
+  console.log ("Relay forwarder address: ", ForwarderAddress);
   // Unpack request
   const { to, from, value, gas, nonce, data, signature } = request;
 
@@ -74,7 +76,7 @@ async function relay(request) {
   //});
 
   const tx = {
-    hash: "0x",
+    hash: "0x00000",
     error: ""
   };
 

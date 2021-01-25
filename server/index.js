@@ -19,7 +19,7 @@ const relayHandler = (req, res) => {
 //      res.status(statusCode).send(JSON.parse(body));
 //    }
 //  });
-    res.status(200).send(JSON.parse('{ "name":"John", "age":30, "city":"New York"}'))
+    res.status(200).send(JSON.parse('{ "hash": "0x0000", "name":"John", "age":30, "city":"New York", "error" : ""}'))
     console.log("Sending request.");
 };
 
