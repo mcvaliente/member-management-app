@@ -49,7 +49,6 @@ const TypedData = {
 
 async function relay(request) {
 
-  console.log ("Relay forwarder address: ", ForwarderAddress);
   // Unpack request
   const { to, from, value, gas, nonce, data, signature } = request;
 

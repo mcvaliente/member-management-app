@@ -409,111 +409,127 @@ class NewMember extends Component {
           icon: "warning",
           buttons: ["Cancelar", "Aceptar"],
           dangerMode: true,
-        }).then(async (willContinue) => {
+        }).then((willContinue) => {
           if (willContinue) {
-            //Show loading and reset the error message to an empty string.
-            this.setState({ loading: true, errorMessages: {} });
-            //We have to check if web3 has a value.
-            //Create the new member indicating the creator of this member.
-            const bytes16Birthdate = web3.utils.fromAscii(this.state.birthdate);
-            const bytes16AcceptanceDate = web3.utils.fromAscii(this.state.acceptanceDate);
-            const bytes16MemberDates = [bytes16Birthdate, bytes16AcceptanceDate];
+            //Now, we ask if the user want to use a meta-transaction or not.
+            swal({
+              title: "Método de pago de la operación",
+              text:
+                "Indica si el pago se realiza a través de una cuenta externa.",
+              icon: "info",
+              buttons: ["No", "Sí"],
+              dangerMode: true,
+            }).then( async (willContinue) => {
+              //Show loading and reset the error message to an empty string.
+              this.setState({ loading: true, errorMessages: {} });
+              //We have to check if web3 has a value.
+              //Create the new member indicating the creator of this member.
+              const bytes16Birthdate = web3.utils.fromAscii(this.state.birthdate);
+              const bytes16AcceptanceDate = web3.utils.fromAscii(this.state.acceptanceDate);
+              const bytes16MemberDates = [bytes16Birthdate, bytes16AcceptanceDate];
+              //Save the id of the occupation not the name.
+              const bytes16Occupations = this.state.selectedOccupations.map(
+                (occupation) => {
+                  return web3.utils.fromAscii(occupation);
+                }
+              );
+              const bytes16MemberOffice = web3.utils.fromAscii(this.state.office);
+              const bytes16MemberCounty = web3.utils.fromAscii(this.state.county);
+              const bytes16MemberCountry = web3.utils.fromAscii(this.state.country);
+              const bytes16MemberLocation = [bytes16MemberOffice, bytes16MemberCounty, bytes16MemberCountry];
 
-            //Save the id of the occupation not the name.
-            const bytes16Occupations = this.state.selectedOccupations.map(
-              (occupation) => {
-                return web3.utils.fromAscii(occupation);
-              }
-            );
-            const bytes16MemberOffice = web3.utils.fromAscii(this.state.office);
-            const bytes16MemberCounty = web3.utils.fromAscii(this.state.county);
-            const bytes16MemberCountry = web3.utils.fromAscii(this.state.country);
-            const bytes16MemberLocation = [bytes16MemberOffice, bytes16MemberCounty, bytes16MemberCountry];
-
-            // Save the application file and the acceptance file in IPFS.
-            //IPFS HASH SAMPLE: "AnPs55rrWMXcRVuK8HqCcXABCSPn6HDrd9ngjEzMTKdDtD".
-            //console.log("Application filename: ", applicationFileName, "Application file buffer:", applicationFileBuffer);
-            //console.log("Acceptance filename: ", acceptanceFileName, "Acceptance file buffer:", acceptanceFileBuffer);
-            let ipfsSuccess = true;
-            //APPLICATION FILE
-            //await ipfs
-              //.add(applicationFileBuffer)
-              //.then( (response) => {
-                //console.log("Application file response: ", response);
-                //ipfsApplicationFileId = response.path; //response.cid.string is another option to get the hash.
-                //console.log("Application file hash id: ", ipfsApplicationFileId);
-              //})
-              //.catch((err) => {
-              //  ipfsSuccess = false;
-              //  console.error("IPFS failure (application file): ", err);
-              //  errors["general"] = "ERROR IPFS - No se ha podido almacenar el fichero de solicitud. Por favor, contacta con el equipo de P2P Models.";
-              //  this.setState({ loading: false, errorMessages: errors });
-              //});
-            //TESTING PURPOSE
-            ipfsApplicationFileId="QmcxqEjTw36wSb9gFm1EGm8EJxUAxkgmjpbvqDR5XVh1Mb";
-
-            if (ipfsSuccess){
-              //ACCEPTANCE FILE
-              //await ipfs
-                //.add(acceptanceFileBuffer)
-                //.then((response) => {
-                  //console.log("Acceptance file response: ", response);
-                  //ipfsAcceptanceFileId = response.path; //response.cid.string is another option to get the hash.
-                  //console.log("Acceptance file hash id: ", ipfsAcceptanceFileId);
-                //})
-                //.catch((err) => {
-                  //ipfsSuccess = false;
-                  //console.error("IPFS failure (acceptance file): ", err);
-                  //errors["general"] = "ERROR IPFS - No se ha podido almacenar el certificado de aceptación. Por favor, contacta con el equipo de P2P Models.";
-                  //this.setState({ loading: false, errorMessages: errors });
-                //});
+              // Save the application file and the acceptance file in IPFS.
+              //IPFS HASH SAMPLE: "AnPs55rrWMXcRVuK8HqCcXABCSPn6HDrd9ngjEzMTKdDtD".
+              //console.log("Application filename: ", applicationFileName, "Application file buffer:", applicationFileBuffer);
+              //console.log("Acceptance filename: ", acceptanceFileName, "Acceptance file buffer:", acceptanceFileBuffer);
+              let ipfsSuccess = true;
+              //APPLICATION FILE
+              await ipfs
+                .add(applicationFileBuffer)
+                .then( (response) => {
+                  console.log("Application file response: ", response);
+                  ipfsApplicationFileId = response.path; //response.cid.string is another option to get the hash.
+                  console.log("Application file hash id: ", ipfsApplicationFileId);
+                })
+                .catch((err) => {
+                  ipfsSuccess = false;
+                  console.error("IPFS failure (application file): ", err);
+                  errors["general"] = "ERROR IPFS - No se ha podido almacenar el fichero de solicitud. Por favor, contacta con el equipo de P2P Models.";
+                  this.setState({ loading: false, errorMessages: errors });
+                });
               //TESTING PURPOSE
-              ipfsAcceptanceFileId="QmTwV2q4t2KYJ1ct3vwmi2Bhvfi8RGzo6nBJVGodGmotAq"; 
-            }
-
-            if (ipfsSuccess){
+              //ipfsApplicationFileId="QmcxqEjTw36wSb9gFm1EGm8EJxUAxkgmjpbvqDR5XVh1Mb";
+              if (ipfsSuccess){
+                //ACCEPTANCE FILE
+                await ipfs
+                  .add(acceptanceFileBuffer)
+                  .then((response) => {
+                    console.log("Acceptance file response: ", response);
+                    ipfsAcceptanceFileId = response.path; //response.cid.string is another option to get the hash.
+                    console.log("Acceptance file hash id: ", ipfsAcceptanceFileId);
+                  })
+                  .catch((err) => {
+                    ipfsSuccess = false;
+                    console.error("IPFS failure (acceptance file): ", err);
+                    errors["general"] = "ERROR IPFS - No se ha podido almacenar el certificado de aceptación. Por favor, contacta con el equipo de P2P Models.";
+                    this.setState({ loading: false, errorMessages: errors });
+                  });
+                //TESTING PURPOSE
+                //ipfsAcceptanceFileId="QmTwV2q4t2KYJ1ct3vwmi2Bhvfi8RGzo6nBJVGodGmotAq"; 
+              }
+              if (ipfsSuccess) {
+                let txSuccess = true;
                 try {
-                  //Get the current account.
                   const currentAccount = getCurrentAccount();
-                  //Instead of executing the createMember method from this account,
-                  //we create the meta-transaction in order to send gasless transactions
-                  //for the users of the app.
-                  //await factory.methods
-                  //  .createMember(
-                  //    bytes16MemberId,
-                  //    bytes16MemberDates,
-                  //    this.state.name,
-                  //    this.state.surname,
-                  //    this.state.email,
-                  //    bytes16MemberLocation,
-                  //    bytes16Occupations,
-                  //    ipfsApplicationFileId,
-                  //    ipfsAcceptanceFileId
-                  //  )
-                  //  .send({
-                  //    from: currentAccount,
-                  //    gas: "2000000",
-                  //  });
-                  const tx = await submit(
-                    bytes16MemberId, 
-                    bytes16MemberDates, 
-                    this.state.name, 
-                    this.state.surname,
-                    this.state.email,
-                    bytes16MemberLocation,
-                    bytes16Occupations,
-                    ipfsApplicationFileId,
-                    ipfsAcceptanceFileId,
-                    web3,
-                    currentAccount);
-                  console.log("tx result hash: ", tx.hash);
-                  console.log("tx result error: ", tx.error);
-                  try {
-                    //If the transaction includes an error message there has been a failure.
-                    if (tx.error !== ""){
-                      throw new Error(tx.error);
-                    }  
-                    this.setState({ loading: false, txHash: tx.hash, errorMessages: {} });
+                  if (willContinue){
+                    //Instead of executing the createMember method from this account,
+                    //we create the meta-transaction in order to send gasless transactions
+                    //for the users of the app.
+                    const tx = await submit(
+                      bytes16MemberId, 
+                      bytes16MemberDates, 
+                      this.state.name, 
+                      this.state.surname,
+                      this.state.email,
+                      bytes16MemberLocation,
+                      bytes16Occupations,
+                      ipfsApplicationFileId,
+                      ipfsAcceptanceFileId,
+                      web3,
+                      currentAccount);
+                    console.log("tx result hash: ", tx.hash);
+                    console.log("tx result error: ", tx.error);
+                    try {
+                      //If the transaction includes an error message there has been a failure.
+                      if (tx.error !== ""){
+                        throw new Error(tx.error);
+                      }  
+                      this.setState({ loading: false, txHash: tx.hash, errorMessages: {} });
+                    } catch (error) {
+                      txSuccess = false;
+                      errors["general"] = error.message;
+                      this.setState({ loading: false, errorMessages: errors });        
+                    }
+                  } else {
+                    await factory.methods
+                      .createMember(
+                        bytes16MemberId,
+                        bytes16MemberDates,
+                        this.state.name,
+                        this.state.surname,
+                        this.state.email,
+                        bytes16MemberLocation,
+                        bytes16Occupations,
+                        ipfsApplicationFileId,
+                        ipfsAcceptanceFileId
+                      )
+                      .send({
+                        from: currentAccount,
+                        gas: "2000000",
+                      });
+                    this.setState({ loading: false, errorMessages: {} });
+                  }
+                  if (txSuccess) {
                     swal({
                       title: "Has añadido a este socio/a correctamente.",
                       text: "¿Qué quieres hacer ahora?",
@@ -548,17 +564,15 @@ class NewMember extends Component {
                         //Return to the main page.
                         this.setState({ returnMainPage: true });
                       }
-                    });
-                  } catch (error) {
-                    errors["general"] = error.message;
-                    this.setState({ loading: false, errorMessages: errors });        
+                    });  
                   }
-                } catch (error) {
+                } catch (error){
                   //Failed to fetch
-                  errors["general"] = "ERROR Meta-transacción: No ha sido posible redireccionar la transacción . Por favor, contacta con el equipo de P2P Models.";
+                  errors["general"] = error.message;
                   this.setState({ loading: false, errorMessages: errors });            
-                }
-            }
+                }                  
+              }
+            });
           }
         });
       }
