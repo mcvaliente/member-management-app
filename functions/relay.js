@@ -1,7 +1,7 @@
+require('dotenv').config();
 //const RelayerApiKey = process.env.APP_API_KEY;
 //const RelayerSecretKey = process.env.APP_SECRET_KEY;
 const ForwarderAddress = process.env.APP_FORWARDER_CONTRACT_ADDRESS;
-
 //const { Relayer } = require('defender-relay-client');
 //const { ethers } = require('ethers');
 //const ForwarderAbi = require('../artifacts/Forwarder.json').abi;
@@ -49,8 +49,17 @@ const TypedData = {
 
 async function relay(request) {
 
+  console.log ("Forwarder address: ", ForwarderAddress);
   // Unpack request
   const { to, from, value, gas, nonce, data, signature } = request;
+  console.log("To: ", to);
+  console.log("From: ", from);
+  console.log("Value: ", value);
+  console.log("Gas: ", gas);
+  console.log("Nonce: ", nonce);
+  console.log("Data: ", data);
+  console.log("Signature: ", signature);
+  
 
   // Validate request
   //const provider = new ethers.providers.InfuraProvider('rinkeby', process.env.APP_INFURA_KEY);

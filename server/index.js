@@ -1,5 +1,3 @@
-require('dotenv').config();
-
 const express = require('express');
 const cors = require('cors');
 const port = 4000;
@@ -23,7 +21,7 @@ const relayHandler = (req, res) => {
   console.log("Sending request.");
 };
 
-//It captures the call http://localhost:4000/relay ('/relay' as the firs parameter)
+//It captures the call http://localhost:4000/relay ('/relay' as the first parameter)
 //since the node server is listening in http://localhost:4000, and then it executes
 //the function relayHandler.
 app.post('/relay', relayHandler);
@@ -31,5 +29,6 @@ app.post('/relay', relayHandler);
 // Start the Express server
 app.listen(port, () => {
   console.log(`App listening at http://localhost:${port}`);
-})
+});
+
 
