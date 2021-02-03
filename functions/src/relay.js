@@ -1,4 +1,4 @@
-require('dotenv').config();
+//import forwarder from "../../src/contracts/forwarder";
 //const RelayerApiKey = process.env.APP_API_KEY;
 //const RelayerSecretKey = process.env.APP_SECRET_KEY;
 const ForwarderAddress = process.env.APP_FORWARDER_CONTRACT_ADDRESS;
@@ -44,12 +44,11 @@ const TypedData = {
 //const TypeName = `ForwardRequest(${GenericParams})`;
 //const TypeHash = ethers.utils.id(TypeName);
 
-//const DomainSeparator = bufferToHex(TypedDataUtils.hashStruct('EIP712Domain', TypedData.domain, TypedData.types));
+const DomainSeparator = bufferToHex(TypedDataUtils.hashStruct('EIP712Domain', TypedData.domain, TypedData.types));
 //const SuffixData = '0x';
 
 async function relay(request) {
 
-  console.log ("Forwarder address: ", ForwarderAddress);
   // Unpack request
   const { to, from, value, gas, nonce, data, signature } = request;
   console.log("To: ", to);
@@ -62,16 +61,20 @@ async function relay(request) {
   
 
   // Validate request
-  //const provider = new ethers.providers.InfuraProvider('rinkeby', process.env.APP_INFURA_KEY);
   //const forwarder = new ethers.Contract(ForwarderAddress, ForwarderAbi, provider);
-  //const args = [
-  //  { to, from, value, gas, nonce, data },
-  //  DomainSeparator,
-  //  TypeHash,
-  //  SuffixData,
-  //  signature
-  //];
-  //await forwarder.verify(...args);
+  const args = [
+    { to, from, value, gas, nonce, data },
+    DomainSeparator,
+    TypeHash,
+    SuffixData,
+    signature
+  ];
+  await forwarder.methods
+          .verify(...args)
+          .send({
+            from: from,
+            gas: "1000000",
+          });;
   
   // Send meta-tx through Defender
   //const forwardData = forwarder.interface.encodeFunctionData('execute', args);

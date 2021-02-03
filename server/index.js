@@ -1,7 +1,9 @@
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const port = 4000;
-const relay = require('../functions/relay').handler;
+const relay = require('../functions/src/relay').handler;
 // Create Express app
 const app = express();
 
