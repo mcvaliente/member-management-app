@@ -444,38 +444,38 @@ class NewMember extends Component {
               //console.log("Acceptance filename: ", acceptanceFileName, "Acceptance file buffer:", acceptanceFileBuffer);
               let ipfsSuccess = true;
               //APPLICATION FILE
-              await ipfs
-                .add(applicationFileBuffer)
-                .then( (response) => {
+              //await ipfs
+                //.add(applicationFileBuffer)
+                //.then( (response) => {
                   //console.log("Application file response: ", response);
-                  ipfsApplicationFileId = response.path; //response.cid.string is another option to get the hash.
-                  console.log("Application file hash id: ", ipfsApplicationFileId);
-                })
-                .catch((err) => {
-                  ipfsSuccess = false;
-                  console.error("IPFS failure (application file): ", err);
-                  errors["general"] = "ERROR IPFS - No se ha podido almacenar el fichero de solicitud. Por favor, contacta con el equipo de P2P Models.";
-                  this.setState({ loading: false, errorMessages: errors });
-                });
+                  //ipfsApplicationFileId = response.path; //response.cid.string is another option to get the hash.
+                  //console.log("Application file hash id: ", ipfsApplicationFileId);
+                //})
+                //.catch((err) => {
+                  //ipfsSuccess = false;
+                  //console.error("IPFS failure (application file): ", err);
+                  //errors["general"] = "ERROR IPFS - No se ha podido almacenar el fichero de solicitud. Por favor, contacta con el equipo de P2P Models.";
+                  //this.setState({ loading: false, errorMessages: errors });
+                //});
               //TESTING PURPOSE
-              //ipfsApplicationFileId="QmcxqEjTw36wSb9gFm1EGm8EJxUAxkgmjpbvqDR5XVh1Mb";
+              ipfsApplicationFileId="QmcxqEjTw36wSb9gFm1EGm8EJxUAxkgmjpbvqDR5XVh1Mb";
               if (ipfsSuccess){
                 //ACCEPTANCE FILE
-                await ipfs
-                  .add(acceptanceFileBuffer)
-                  .then((response) => {
-                    console.log("Acceptance file response: ", response);
-                    ipfsAcceptanceFileId = response.path; //response.cid.string is another option to get the hash.
-                    console.log("Acceptance file hash id: ", ipfsAcceptanceFileId);
-                  })
-                  .catch((err) => {
-                    ipfsSuccess = false;
-                    console.error("IPFS failure (acceptance file): ", err);
-                    errors["general"] = "ERROR IPFS - No se ha podido almacenar el certificado de aceptación. Por favor, contacta con el equipo de P2P Models.";
-                    this.setState({ loading: false, errorMessages: errors });
-                  });
+                //await ipfs
+                  //.add(acceptanceFileBuffer)
+                  //.then((response) => {
+                    //console.log("Acceptance file response: ", response);
+                    //ipfsAcceptanceFileId = response.path; //response.cid.string is another option to get the hash.
+                    //console.log("Acceptance file hash id: ", ipfsAcceptanceFileId);
+                  //})
+                  //.catch((err) => {
+                    //ipfsSuccess = false;
+                    //console.error("IPFS failure (acceptance file): ", err);
+                    //errors["general"] = "ERROR IPFS - No se ha podido almacenar el certificado de aceptación. Por favor, contacta con el equipo de P2P Models.";
+                    //this.setState({ loading: false, errorMessages: errors });
+                  //});
                 //TESTING PURPOSE
-                //ipfsAcceptanceFileId="QmTwV2q4t2KYJ1ct3vwmi2Bhvfi8RGzo6nBJVGodGmotAq"; 
+                ipfsAcceptanceFileId="QmTwV2q4t2KYJ1ct3vwmi2Bhvfi8RGzo6nBJVGodGmotAq"; 
               }
               if (ipfsSuccess) {
                 let txSuccess = true;

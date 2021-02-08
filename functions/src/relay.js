@@ -1,13 +1,12 @@
-//import forwarder from "../../src/contracts/forwarder";
+const Web3 = require('web3');
+const ForwarderAddress = process.env.APP_FORWARDER_CONTRACT_ADDRESS;
+const Forwarder = require('../../artifacts/Forwarder.json');
 //const RelayerApiKey = process.env.APP_API_KEY;
 //const RelayerSecretKey = process.env.APP_SECRET_KEY;
-const ForwarderAddress = process.env.APP_FORWARDER_CONTRACT_ADDRESS;
 //const { Relayer } = require('defender-relay-client');
-//const { ethers } = require('ethers');
-const ForwarderAbi = require('../../artifacts/Forwarder.json').abi;
 
-//const { TypedDataUtils } = require('eth-sig-util');
-//const { bufferToHex } = require('ethereumjs-util');
+const { TypedDataUtils } = require('eth-sig-util');
+const { bufferToHex } = require('ethereumjs-util');
 
 const EIP712DomainType = [
   { name: 'name', type: 'string' },
@@ -27,7 +26,7 @@ const ForwardRequestType = [
 
 const TypedData = {
   domain: {
-    name: 'Defender',
+    name: 'Relayer',
     version: '1',
     chainId: process.env.APP_CHAIN_ID,
     verifyingContract: ForwarderAddress
@@ -40,12 +39,11 @@ const TypedData = {
   message: {}
 };
 
-//const GenericParams = 'address from,address to,uint256 value,uint256 gas,uint256 nonce,bytes data';
-//const TypeName = `ForwardRequest(${GenericParams})`;
-//const TypeHash = ethers.utils.id(TypeName);
+const GenericParams = 'address from,address to,uint256 value,uint256 gas,uint256 nonce,bytes data';
+const TypeName = `ForwardRequest(${GenericParams})`;
 
-//const DomainSeparator = bufferToHex(TypedDataUtils.hashStruct('EIP712Domain', TypedData.domain, TypedData.types));
-//const SuffixData = '0x';
+const DomainSeparator = bufferToHex(TypedDataUtils.hashStruct('EIP712Domain', TypedData.domain, TypedData.types));
+const SuffixData = '0x';
 
 async function relay(request) {
   console.log("Relay - Forwarder address: ", ForwarderAddress);
@@ -62,14 +60,18 @@ async function relay(request) {
   
 
   // Validate request
-  //const forwarder = new ethers.Contract(ForwarderAddress, ForwarderAbi, provider);
-  //const args = [
-  //  { to, from, value, gas, nonce, data },
-  //  DomainSeparator,
-  //  TypeHash,
-  //  SuffixData,
-  //  signature
-  //];
+  let web3 = new Web3(Web3.givenProvider);
+  const forwarder = new web3.eth.Contract(Forwarder.abi, process.env.REACT_APP_FORWARDER_CONTRACT_ADDRESS);
+  const TypeHash = web3.utils.keccak256(TypeName);
+  console.log("TypedHash: ", TypeHash);
+  const args = [
+    { to, from, value, gas, nonce, data },
+    DomainSeparator,
+    TypeHash,
+    SuffixData,
+    signature
+  ];
+  
   //await forwarder.methods
   //        .verify(...args)
   //        .send({
