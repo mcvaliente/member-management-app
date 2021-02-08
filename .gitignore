@@ -4,7 +4,8 @@
 compile.js
 deploy.js
 .env
-
+/artifacts
+/src/contracts/build
 
 # dependencies
 /node_modules
@@ -18,7 +19,6 @@ deploy.js
 
 # production
 /build
-/src/contracts/build
 
 # misc
 .DS_Store

@@ -4,7 +4,7 @@
 const ForwarderAddress = process.env.APP_FORWARDER_CONTRACT_ADDRESS;
 //const { Relayer } = require('defender-relay-client');
 //const { ethers } = require('ethers');
-//const ForwarderAbi = require('../artifacts/Forwarder.json').abi;
+const ForwarderAbi = require('../../artifacts/Forwarder.json').abi;
 
 //const { TypedDataUtils } = require('eth-sig-util');
 //const { bufferToHex } = require('ethereumjs-util');
@@ -29,7 +29,7 @@ const TypedData = {
   domain: {
     name: 'Defender',
     version: '1',
-    chainId: 4,
+    chainId: process.env.APP_CHAIN_ID,
     verifyingContract: ForwarderAddress
   },
   primaryType: 'ForwardRequest',
@@ -44,11 +44,12 @@ const TypedData = {
 //const TypeName = `ForwardRequest(${GenericParams})`;
 //const TypeHash = ethers.utils.id(TypeName);
 
-const DomainSeparator = bufferToHex(TypedDataUtils.hashStruct('EIP712Domain', TypedData.domain, TypedData.types));
+//const DomainSeparator = bufferToHex(TypedDataUtils.hashStruct('EIP712Domain', TypedData.domain, TypedData.types));
 //const SuffixData = '0x';
 
 async function relay(request) {
-
+  console.log("Relay - Forwarder address: ", ForwarderAddress);
+  console.log("Relay - Chain id: ", process.env.APP_CHAIN_ID);
   // Unpack request
   const { to, from, value, gas, nonce, data, signature } = request;
   console.log("To: ", to);
@@ -62,19 +63,19 @@ async function relay(request) {
 
   // Validate request
   //const forwarder = new ethers.Contract(ForwarderAddress, ForwarderAbi, provider);
-  const args = [
-    { to, from, value, gas, nonce, data },
-    DomainSeparator,
-    TypeHash,
-    SuffixData,
-    signature
-  ];
-  await forwarder.methods
-          .verify(...args)
-          .send({
-            from: from,
-            gas: "1000000",
-          });;
+  //const args = [
+  //  { to, from, value, gas, nonce, data },
+  //  DomainSeparator,
+  //  TypeHash,
+  //  SuffixData,
+  //  signature
+  //];
+  //await forwarder.methods
+  //        .verify(...args)
+  //        .send({
+  //          from: from,
+  //          gas: "1000000",
+  //        });;
   
   // Send meta-tx through Defender
   //const forwardData = forwarder.interface.encodeFunctionData('execute', args);
