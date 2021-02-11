@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity >=0.4.22 <0.7.0;
+pragma solidity >=0.4.22 <0.9.0;
 
 /**
  * A base contract to be inherited by any contract that want to receive relayed transactions
@@ -27,7 +27,7 @@ contract BaseRelayRecipient {
      * otherwise, return `msg.sender`.
      * should be used in the contract anywhere instead of msg.sender
      */
-    function _msgSender() internal virtual view returns (address payable ret) {
+    function _msgSender() internal virtual view returns (address ret) {
         if (msg.data.length >= 24 && isTrustedForwarder(msg.sender)) {
             // At this point we know that the sender is a trusted forwarder,
             // so we trust that the last bytes of msg.data are the verified sender address.
@@ -73,7 +73,7 @@ contract MemberFactory is BaseRelayRecipient {
     uint32 deployedMembers;
     mapping(bytes16 => bool) activeMembers;
 
-    constructor (address _trustedForwarder) public {
+    constructor (address _trustedForwarder) {
         trustedForwarder = _trustedForwarder;
     }
 

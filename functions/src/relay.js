@@ -41,17 +41,19 @@ const TypedData = {
 
 const GenericParams = 'address from,address to,uint256 value,uint256 gas,uint256 nonce,bytes data';
 const TypeName = `ForwardRequest(${GenericParams})`;
+console.log("TypeName: ", TypeName);
 
 const DomainSeparator = bufferToHex(TypedDataUtils.hashStruct('EIP712Domain', TypedData.domain, TypedData.types));
+console.log("DomainSeparator: ", DomainSeparator);
 const SuffixData = '0x';
 
 async function relay(request) {
   console.log("Relay - Forwarder address: ", ForwarderAddress);
   console.log("Relay - Chain id: ", process.env.APP_CHAIN_ID);
   // Unpack request
-  const { to, from, value, gas, nonce, data, signature } = request;
-  console.log("To: ", to);
+  const { from, to, value, gas, nonce, data, signature } = request;
   console.log("From: ", from);
+  console.log("To: ", to);
   console.log("Value: ", value);
   console.log("Gas: ", gas);
   console.log("Nonce: ", nonce);
@@ -63,22 +65,23 @@ async function relay(request) {
   let web3 = new Web3(Web3.givenProvider);
   const forwarder = new web3.eth.Contract(Forwarder.abi, process.env.REACT_APP_FORWARDER_CONTRACT_ADDRESS);
   const TypeHash = web3.utils.keccak256(TypeName);
-  console.log("TypedHash: ", TypeHash);
+  console.log("TypeHash: ", TypeHash);
   const args = [
-    { to, from, value, gas, nonce, data },
+    { from, to, value, gas, nonce, data },
     DomainSeparator,
     TypeHash,
     SuffixData,
     signature
   ];
+  console.log("args: ", ...args);
   
-  //await forwarder.methods
-  //        .verify(...args)
-  //        .send({
-  //          from: from,
-  //          gas: "1000000",
-  //        });;
-  
+  await forwarder.methods
+          .verify(...args)
+          .send({
+            from: from,
+            gas: "2000000",
+          });
+
   // Send meta-tx through Defender
   //const forwardData = forwarder.interface.encodeFunctionData('execute', args);
   //const relayer = new Relayer(RelayerApiKey, RelayerSecretKey);

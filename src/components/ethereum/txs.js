@@ -1,4 +1,6 @@
 import factory from "../../contracts/factory";
+import forwarder from "../../contracts/forwarder";
+
 
 const ZeroAddress = '0x0000000000000000000000000000000000000000';
 const MemberAddress = process.env.REACT_APP_MEMBER_CONTRACT_ADDRESS || ZeroAddress;
@@ -44,14 +46,10 @@ export async function submit(memberId, memberDates, name, surname, email, member
   //console.log("txs network: ", network);
 
   // Get nonce for current signer
-  //Get the number of transactions sent from this address. We add "pending" in order to 
-  //include pending transactions. Then we obtain the nonce.
-  //e.g. nonce: 243
-  //NOTA: No sé si la dirección debería ser la del contrato del Forwarder y no la de from. Ya se verá
-  //cuando termine de implementar la gestión de la transacción (depende de si lanzo una transacción desde
-  //el contrato forwarder).
-  const nonce = await web3.eth.getTransactionCount(from, "pending").then(nonce => nonce.toString());
-  //console.log("nonce:" , nonce);
+  const nonce = await forwarder.methods
+                      .getNonce(from)
+                      .call();
+  console.log("nonce:" , nonce);
 
   console.log ("Chain id: ", process.env.REACT_APP_CHAIN_ID);
   console.log("Member contract address: ", process.env.REACT_APP_FORWARDER_CONTRACT_ADDRESS);

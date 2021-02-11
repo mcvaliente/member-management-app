@@ -1,5 +1,5 @@
 // SPDX-License-Identifier:MIT
-pragma solidity ^0.6.2;
+pragma solidity >=0.4.22 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 /**
@@ -86,7 +86,43 @@ library ECDSA {
     }
 }
 
-contract Forwarder  {
+contract Ownable {
+
+    //Address that deploys the contract (i.e., the owner of the contract).
+    address owner;
+    mapping (address => bool) grantedUsers;
+
+    modifier onlyOwner(address userAccount){
+        require(
+            owner == userAccount,
+            "ERROR_NOT_OWNER."
+        );
+        _;
+    }
+
+    modifier restricted(address userAccount){
+        require(
+            grantedUsers[userAccount],
+            "ERROR_NOT_GRANTED_USER."
+        );
+        _;
+    }
+
+    function addGrantedUser(address userAccount) public  onlyOwner(msg.sender) {
+        grantedUsers[userAccount] = true;
+    }
+
+    function revokeGrantedUser(address userAccount) public onlyOwner(msg.sender) {
+        grantedUsers[userAccount] = false;
+    }
+    
+    function isGrantedUser(address userAccount) public view returns (bool){
+        return grantedUsers[userAccount];
+    }
+
+}
+
+contract Forwarder is Ownable {
     struct ForwardRequest {
         address from;
         address to;
@@ -98,26 +134,31 @@ contract Forwarder  {
 
     using ECDSA for bytes32;
 
-    string public constant GENERIC_PARAMS = "address from,address to,uint256 value,uint256 gas,uint256 nonce,bytes data";
-
     mapping(bytes32 => bool) public typeHashes;
 
     // Nonces of senders, used to prevent replay attacks
     mapping(address => uint256) private nonces;
+    mapping(address => bytes32) private hashes;
 
     // solhint-disable-next-line no-empty-blocks
-    receive() external payable {}
+    receive() external payable {}  
 
-    function getNonce(address from)
-    public view
-    returns (uint256) {
-        return nonces[from];
+    constructor(address creator) {
+        owner = creator;
     }
 
-    constructor() public {
+    function registerUserAccount(address userAccount) public restricted(userAccount) {
+        bytes32 userHash = keccak256(abi.encodePacked(userAccount));
+        typeHashes[userHash] = true;
+        hashes[userAccount] = userHash;        
+    }
 
-        string memory requestType = string(abi.encodePacked("ForwardRequest(", GENERIC_PARAMS, ")"));
-        registerRequestTypeInternal(requestType);
+    function getNonce(address userAccount) public restricted(userAccount) view returns (uint256) {
+        return nonces[userAccount];
+    }
+
+    function getHash(address userAccount) public restricted(userAccount) view returns (bytes32) {
+        return hashes[userAccount];
     }
 
     function verify(
@@ -156,35 +197,14 @@ contract Forwarder  {
 
 
     function _verifyNonce(ForwardRequest memory req) internal view {
-        require(nonces[req.from] == req.nonce, "nonce mismatch");
+        require(nonces[req.from] == req.nonce, "Metatransaction Failure - Nonce mismatch");
     }
 
     function _updateNonce(ForwardRequest memory req) internal {
         nonces[req.from]++;
     }
 
-    function registerRequestType(string calldata typeName, string calldata typeSuffix) external {
-
-        for (uint i = 0; i < bytes(typeName).length; i++) {
-            bytes1 c = bytes(typeName)[i];
-            require(c != "(" && c != ")", "invalid typename");
-        }
-
-        string memory requestType = string(abi.encodePacked(typeName, "(", GENERIC_PARAMS, ",", typeSuffix));
-        registerRequestTypeInternal(requestType);
-    }
-
-    function registerRequestTypeInternal(string memory requestType) internal {
-
-        bytes32 requestTypehash = keccak256(bytes(requestType));
-        typeHashes[requestTypehash] = true;
-        emit RequestTypeRegistered(requestTypehash, string(requestType));
-    }
-
-
-    event RequestTypeRegistered(bytes32 indexed typeHash, string typeStr);
-
-
+ 
     function _verifySig(
         ForwardRequest memory req,
         bytes32 domainSeparator,
