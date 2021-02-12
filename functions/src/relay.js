@@ -64,8 +64,11 @@ async function relay(request) {
   // Validate request
   let web3 = new Web3(Web3.givenProvider);
   const forwarder = new web3.eth.Contract(Forwarder.abi, process.env.REACT_APP_FORWARDER_CONTRACT_ADDRESS);
-  const TypeHash = web3.utils.keccak256(TypeName);
-  console.log("TypeHash: ", TypeHash);
+  //Get user account hash for the signer.
+  const TypeHash = await forwarder.methods
+                    .getHash(from)
+                    .call();
+  console.log ("User account hash:", usrHash);  
   const args = [
     { from, to, value, gas, nonce, data },
     DomainSeparator,
@@ -75,12 +78,12 @@ async function relay(request) {
   ];
   console.log("args: ", ...args);
   
-  await forwarder.methods
-          .verify(...args)
-          .send({
-            from: from,
-            gas: "2000000",
-          });
+//  await forwarder.methods
+//          .verify(...args)
+//          .send({
+//            from: from,
+//            gas: "2000000",
+//          });
 
   // Send meta-tx through Defender
   //const forwardData = forwarder.interface.encodeFunctionData('execute', args);

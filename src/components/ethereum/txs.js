@@ -45,12 +45,15 @@ export async function submit(memberId, memberDates, name, surname, email, member
   //e.g. (if selected Rinkeby in our MetaMask account) txs network: 4
   //console.log("txs network: ", network);
 
-  // Get nonce for current signer
+  // Get nonce for current signer.
   const nonce = await forwarder.methods
                       .getNonce(from)
                       .call();
   console.log("nonce:" , nonce);
-
+  //Get user account hash for the signer.
+  const TypeHash = await forwarder.methods
+                    .getHash(from)
+                    .call();
   console.log ("Chain id: ", process.env.REACT_APP_CHAIN_ID);
   console.log("Member contract address: ", process.env.REACT_APP_FORWARDER_CONTRACT_ADDRESS);
 
