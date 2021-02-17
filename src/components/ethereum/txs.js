@@ -51,9 +51,10 @@ export async function submit(memberId, memberDates, name, surname, email, member
                       .call();
   console.log("nonce:" , nonce);
   //Get user account hash for the signer.
-  const TypeHash = await forwarder.methods
+  const typeHash = await forwarder.methods
                     .getHash(from)
                     .call();
+  console.log("TypeHash: ", typeHash);
   console.log ("Chain id: ", process.env.REACT_APP_CHAIN_ID);
   console.log("Member contract address: ", process.env.REACT_APP_FORWARDER_CONTRACT_ADDRESS);
 

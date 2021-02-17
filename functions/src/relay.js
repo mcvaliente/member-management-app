@@ -62,21 +62,39 @@ async function relay(request) {
   
 
   // Validate request
-  let web3 = new Web3(Web3.givenProvider);
-  const forwarder = new web3.eth.Contract(Forwarder.abi, process.env.REACT_APP_FORWARDER_CONTRACT_ADDRESS);
+  //let web3;
+  //if (!web3) {
+    //web3 = new Web3(Web3.givenProvider);
+    //if (typeof window.ethereum !== "undefined") {
+      //In  order to silence a console warning when page inspection.
+      //window.ethereum.autoRefreshOnNetworkChange = false;
+    //}
+  //}
+  //console.log ("Relay - web3: ", web3);
+
+  //let forwarder;
+  //if (web3) {
+    //forwarder = new web3.eth.Contract(
+      //Forwarder.abi,
+      //process.env.REACT_APP_FORWARDER_CONTRACT_ADDRESS
+    //);
+  //}
+
+  //console.log("Relay - forwarder: ", forwarder);
+
   //Get user account hash for the signer.
-  const TypeHash = await forwarder.methods
-                    .getHash(from)
-                    .call();
-  console.log ("User account hash:", usrHash);  
-  const args = [
-    { from, to, value, gas, nonce, data },
-    DomainSeparator,
-    TypeHash,
-    SuffixData,
-    signature
-  ];
-  console.log("args: ", ...args);
+  //const TypeHash = await forwarder.methods
+                    //.getHash(from)
+                    //.call();
+  //console.log ("User account hash:", usrHash);  
+  //const args = [
+  //  { from, to, value, gas, nonce, data },
+  //  DomainSeparator,
+  //  TypeHash,
+  //  SuffixData,
+  //  signature
+  //];
+  //console.log("args: ", ...args);
   
 //  await forwarder.methods
 //          .verify(...args)
